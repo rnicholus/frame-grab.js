@@ -1,0 +1,10 @@
+{
+    "name": "frame-grab",
+    "version": "0.0.1",
+    "devDependencies": {
+        "grunt": "0.4.x",
+        "grunt-contrib-jshint": "0.8.x",
+        "grunt-contrib-watch": "0.5.x",
+        "grunt-contrib-qunit": "0.2.x"
+    }
+}

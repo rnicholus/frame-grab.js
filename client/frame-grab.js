@@ -23,28 +23,35 @@
         },
 
         _timecode_to_secs: function(timecode, frame_rate) {
+            if(!/^(\d{1,2}:)?(\d{1,2}:)?(\d{1,2}:)?\d{1,2}$/.test(timecode)) {
+                throw new Error(timecode + " is not a valid timecode!");
+            }
+
             var segments = timecode.split(":").reverse(),
                 secs_per_frame = 1 / frame_rate,
-                secs = 0;
+                secs = 0,
+                segment_int;
 
             for (var i = 3; i >= 0; i--) {
+                segment_int = parseInt(segments[i]);
+
                 switch (i) {
                     case 0:
-                        secs += parseInt(segments[i]) * secs_per_frame;
+                        secs += segment_int * secs_per_frame;
                         break;
                     case 1:
                         if (segments.length === 2) {
-                            secs += parseInt(segments[i]);
+                            secs += segment_int;
                         }
                         break;
                     case 2:
                         if (segments.length === 3) {
-                            secs += parseInt(segments[i]) * 60;
+                            secs += segment_int * 60;
                         }
                         break;
                     case 3:
                         if (segments.length === 4) {
-                            secs += parseInt(segments[i]) * 60 * 60;
+                            secs += segment_int * 60 * 60;
                         }
                         break;
                 }
