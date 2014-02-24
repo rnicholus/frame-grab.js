@@ -40,12 +40,12 @@
                         secs += segment_int * secs_per_frame;
                         break;
                     case 1:
-                        if (segments.length === 2) {
+                        if (segments.length >= 2) {
                             secs += segment_int;
                         }
                         break;
                     case 2:
-                        if (segments.length === 3) {
+                        if (segments.length >= 3) {
                             secs += segment_int * 60;
                         }
                         break;
