@@ -1,8 +1,18 @@
 (function() {
 
     var FrameGrab = function(video) {
+        if (!video || video.tagName.toLowerCase() !== "video") {
+            throw new Error("You must pass a valid <video>!");
+        }
 
-        this.grab = function(time, opt_frame_rate) {
+        this.grab = function(target_container, time, opt_frame_rate) {
+            if (!target_container ||
+                (target_container.tagName.toLowerCase() !== "canvas" &&
+                target_container.tagName.toLowerCase() !== "img")) {
+
+                throw new Error("Target container must be an <img> or <canvas>!");
+            }
+
             var time_in_secs = this._normalize_time(time, opt_frame_rate);
 
             console.log(time_in_secs);

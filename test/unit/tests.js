@@ -1,4 +1,4 @@
-/* globals module, test, equal, throws */
+/* globals module, test, equal, ok, throws */
 module("_timecode_to_secs");
 
 test("invalid timecode throws error", function() {
@@ -29,31 +29,65 @@ module("_normalize_time");
 test("invalid parameters throw errors", function() {
     throws(function() {
         FrameGrab.prototype._normalize_time("xyz");
-    }, Error);
+    });
 
     throws(function() {
         FrameGrab.prototype._normalize_time(function() {});
-    }, Error);
+    });
 
     throws(function() {
         FrameGrab.prototype._normalize_time(null);
-    }, Error);
+    });
 
     throws(function() {
         FrameGrab.prototype._normalize_time(undefined);
-    }, Error);
+    });
 
     throws(function() {
         FrameGrab.prototype._normalize_time("00:00", null);
-    }, Error);
+    });
 
     throws(function() {
         FrameGrab.prototype._normalize_time("00:00", -1);
-    }, Error);
+    });
 });
 
 test("valid params result in a return value of converted seconds", function() {
     equal(FrameGrab.prototype._normalize_time(3), 3);
 
     equal(FrameGrab.prototype._normalize_time("1:1:1:15", 30), 3661.5);
+});
+
+
+module("constructor");
+
+test("Error if constructed without <video>", function() {
+    /* jshint nonew:false */
+    throws(function() {
+        new FrameGrab();
+    });
+
+    new FrameGrab(document.createElement("video"));
+    ok(true, "Construction w/ a video doesn't result in an Error");
+});
+
+
+module("grab");
+
+test("invalid target container param results in Error", function() {
+    var fg = new FrameGrab(document.createElement("video"));
+
+    throws(function() {
+        fg.grab(document.createElement("div"), 1);
+    });
+
+    throws(function() {
+        fg.grab(null, 1);
+    });
+
+    fg.grab(document.createElement("img"), 1);
+    ok(true, "An img container doesn't result in an Error");
+
+    fg.grab(document.createElement("canvas"), 1);
+    ok(true, "A canvas container doesn't result in an Error");
 });
