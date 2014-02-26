@@ -1,7 +1,7 @@
 (function() {
 
     var FrameGrab = function(video, opt_frame_rate) {
-        if (!video || video.tagName.toLowerCase() !== "video") {
+        if (!video || !video.tagName || video.tagName.toLowerCase() !== "video") {
             throw new Error("You must pass a valid <video>!");
         }
 
