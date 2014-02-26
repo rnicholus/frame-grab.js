@@ -1,5 +1,5 @@
-/* globals module, test, ok, equal, notEqual, throws */
-module("timecode_to_secs");
+/* globals module, test, equal, throws */
+module("_timecode_to_secs");
 
 test("invalid timecode throws error", function() {
     throws(function() {
@@ -21,4 +21,39 @@ test("Valid timecodes are converted into seconds correctly", function() {
 
     equal(FrameGrab.prototype._timecode_to_secs("1:1:1:30", 30), 3662);
     equal(FrameGrab.prototype._timecode_to_secs("1:1:1:15", 30), 3661.5);
+});
+
+
+module("_normalize_time");
+
+test("invalid parameters throw errors", function() {
+    throws(function() {
+        FrameGrab.prototype._normalize_time("xyz");
+    }, Error);
+
+    throws(function() {
+        FrameGrab.prototype._normalize_time(function() {});
+    }, Error);
+
+    throws(function() {
+        FrameGrab.prototype._normalize_time(null);
+    }, Error);
+
+    throws(function() {
+        FrameGrab.prototype._normalize_time(undefined);
+    }, Error);
+
+    throws(function() {
+        FrameGrab.prototype._normalize_time("00:00", null);
+    }, Error);
+
+    throws(function() {
+        FrameGrab.prototype._normalize_time("00:00", -1);
+    }, Error);
+});
+
+test("valid params result in a return value of converted seconds", function() {
+    equal(FrameGrab.prototype._normalize_time(3), 3);
+
+    equal(FrameGrab.prototype._normalize_time("1:1:1:15", 30), 3661.5);
 });

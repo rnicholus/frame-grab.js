@@ -14,7 +14,10 @@
             if (typeof time === "number") {
                 return parseFloat(time);
             }
-            else if (typeof time === "string" && typeof frame_rate === "number") {
+            else if (typeof time === "string" &&
+                typeof frame_rate === "number" &&
+                frame_rate > 0) {
+
                 return this._timecode_to_secs(time, frame_rate);
             }
             else {
