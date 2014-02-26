@@ -1,18 +1,13 @@
 (function() {
 
     var FrameGrab = function(video, opt_frame_rate) {
-        if (!video ||
-            !video.tagName ||
-            video.tagName.toLowerCase() !== "video") {
-
+        if (!this._is_element(video, "video")) {
             throw new Error("You must pass a valid <video>!");
         }
 
         this.grab = function(target_container, time) {
-            if (!target_container ||
-                !target_container.tagName ||
-                (target_container.tagName.toLowerCase() !== "canvas" &&
-                target_container.tagName.toLowerCase() !== "img")) {
+            if (!this._is_element(target_container, "img") &&
+                !this._is_element(target_container, "canvas")) {
 
                 throw new Error("Target container must be an <img> or <canvas>!");
             }
@@ -24,6 +19,12 @@
     };
 
     FrameGrab.prototype = {
+        _is_element: function(el, type) {
+            return el != null &&
+                el.tagName != null &&
+                el.tagName.toLowerCase() === type;
+        },
+
         _normalize_time: function(time, frame_rate) {
             if (typeof time === "number") {
                 return parseFloat(time);
