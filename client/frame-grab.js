@@ -1,12 +1,13 @@
 (function() {
 
-    var FrameGrab = function(video) {
+    var FrameGrab = function(video, opt_frame_rate) {
         if (!video || video.tagName.toLowerCase() !== "video") {
             throw new Error("You must pass a valid <video>!");
         }
 
-        this.grab = function(target_container, time, opt_frame_rate) {
+        this.grab = function(target_container, time) {
             if (!target_container ||
+                !target_container.tagName ||
                 (target_container.tagName.toLowerCase() !== "canvas" &&
                 target_container.tagName.toLowerCase() !== "img")) {
 
