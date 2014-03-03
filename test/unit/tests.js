@@ -66,9 +66,6 @@ test("Error if constructed without <video>", function() {
     throws(function() {
         new FrameGrab();
     });
-
-    new FrameGrab(document.createElement("video"));
-    ok(true, "Construction w/ a video doesn't result in an Error");
 });
 
 
@@ -84,10 +81,15 @@ test("invalid target container param results in Error", function() {
     throws(function() {
         fg.grab(null, 1);
     });
+});
 
-    fg.grab(document.createElement("img"), 1);
-    ok(true, "An img container doesn't result in an Error");
 
-    fg.grab(document.createElement("canvas"), 1);
-    ok(true, "A canvas container doesn't result in an Error");
+module("_uncacheable_url");
+
+test("no-param URL", function() {
+    ok(/^https:\/\/garstasio.com\/test\?fgtimestamp=\d+$/.test(FrameGrab.prototype._uncacheable_url("https://garstasio.com/test")));
+});
+
+test("existing-params URL", function() {
+    ok(/^https:\/\/garstasio.com\/test\?param1=one&fgtimestamp=\d+$/.test(FrameGrab.prototype._uncacheable_url("https://garstasio.com/test?param1=one")));
 });

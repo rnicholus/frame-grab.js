@@ -24,7 +24,7 @@
     "boss": false,
     "eqnull": true,
     "evil": false,
-    "expr": false,
+    "expr": true,
     "funcscope": false,
     "globalstrict": false,
     "iterator": false,
@@ -40,5 +40,5 @@
     "shadow": false,
     "sub": true,
     "supernew": false,
-    "predef": ["document", "$", "console", "window", "FrameGrab"]
+    "predef": ["document", "$", "console", "window", "FrameGrab", "Promise"]
 }
