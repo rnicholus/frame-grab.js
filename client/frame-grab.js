@@ -6,7 +6,7 @@
         }
 
         var video_clone = this._clone_video(video),
-            clone_ready = new Promise(function(resolve, reject) {
+            clone_ready = Q.promise(function(resolve, reject) {
                 video_clone.addEventListener("canplaythrough", function() {
                     resolve();
                 });
@@ -19,17 +19,33 @@
                 throw new Error("Target container must be an <img> or <canvas>!");
             }
 
-            var time_in_secs = this._normalize_time(time, opt_frame_rate);
+            var grab_deferred = new Q.defer(),
+                time_in_secs = this._normalize_time(time, opt_frame_rate);
 
             clone_ready.then(function() {
                 this._seek(video_clone, time_in_secs).then(function() {
                     var canvas = this._is_element(target_container, "canvas") ?
                         target_container :
-                        null;
+                        document.createElement("canvas");
 
-                    canvas = this._draw(video_clone, canvas);
+                    this._draw(video_clone, canvas);
+
+                    if (this._is_element(target_container, "canvas")) {
+                        grab_deferred.resolve(target_container);
+                    }
+                    else {
+                        target_container.onload = function() {
+                            grab_deferred.resolve(target_container);
+                        };
+                        target_container.onerror = function() {
+                            grab_deferred.reject("Frame failed to load in <img>.");
+                        };
+                        target_container.src = canvas.toDataURL();
+                    }
                 }.bind(this));
             }.bind(this));
+
+            return grab_deferred.promise;
         };
     };
 
@@ -65,9 +81,11 @@
             return clone;
         },
 
-        _draw: function(video, opt_canvas) {
-            var canvas = opt_canvas || document.createElement("canvas"),
-                context = canvas.getContext("2d");
+        _draw: function(video, canvas) {
+            var context = canvas.getContext("2d");
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
 
             context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
@@ -96,7 +114,7 @@
         },
 
         _seek: function(video, secs) {
-            return new Promise(function(resolve, reject) {
+            return Q.promise(function(resolve, reject) {
                 var seek_complete = function() {
                     video.removeEventListener("seeked", seek_complete);
                     resolve();

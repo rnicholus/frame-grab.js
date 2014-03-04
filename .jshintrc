@@ -40,5 +40,5 @@
     "shadow": false,
     "sub": true,
     "supernew": false,
-    "predef": ["document", "$", "console", "window", "FrameGrab", "Promise"]
+    "predef": ["document", "$", "console", "window", "FrameGrab", "Q"]
 }
