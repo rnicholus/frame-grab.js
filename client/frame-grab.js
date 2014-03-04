@@ -19,25 +19,14 @@
                 throw new Error("Target container must be an <img> or <canvas>!");
             }
 
+            var time_in_secs = this._normalize_time(time, opt_frame_rate);
+
             clone_ready.then(function() {
-                var time_in_secs = this._normalize_time(time, opt_frame_rate),
-
-                    seek = new Promise(function(resolve, reject) {
-                        var drawFrame = function() {
-                            video_clone.removeEventListener("seeked", drawFrame);
-                            resolve();
-                        };
-
-                        video_clone.addEventListener("seeked", drawFrame);
-                        this._seek(video_clone, time_in_secs);
-                    }.bind(this)),
-
-                    canvas = this._is_element(target_container, "canvas") ?
+                this._seek(video_clone, time_in_secs).then(function() {
+                    var canvas = this._is_element(target_container, "canvas") ?
                         target_container :
                         null;
 
-
-                seek.then(function() {
                     canvas = this._draw(video_clone, canvas);
                 }.bind(this));
             }.bind(this));
@@ -107,7 +96,15 @@
         },
 
         _seek: function(video, secs) {
-            video.currentTime = secs;
+            return new Promise(function(resolve, reject) {
+                var seek_complete = function() {
+                    video.removeEventListener("seeked", seek_complete);
+                    resolve();
+                };
+
+                video.addEventListener("seeked", seek_complete);
+                video.currentTime = secs;
+            });
         },
 
         _timecode_to_secs: function(timecode, frame_rate) {
