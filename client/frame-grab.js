@@ -1,12 +1,14 @@
 (function() {
 
-    var FrameGrab = function(video, opt_frame_rate) {
+    var Promise = RSVP.Promise,
+
+        FrameGrab = function(video, opt_frame_rate) {
         if (!this._is_element(video, "video")) {
             throw new Error("You must pass a valid <video>!");
         }
 
         var video_clone = this._clone_video(video),
-            clone_ready = Q.promise(function(resolve, reject) {
+            clone_ready = new Promise(function(resolve, reject) {
                 video_clone.addEventListener("canplaythrough", function() {
                     resolve();
                 });
@@ -19,7 +21,7 @@
                 throw new Error("Target container must be an <img> or <canvas>!");
             }
 
-            var grab_deferred = new Q.defer(),
+            var grab_deferred = new RSVP.defer(),
                 time_in_secs = this._normalize_time(time, opt_frame_rate);
 
             clone_ready.then(function() {
@@ -114,7 +116,7 @@
         },
 
         _seek: function(video, secs) {
-            return Q.promise(function(resolve, reject) {
+            return new Promise(function(resolve, reject) {
                 var seek_complete = function() {
                     video.removeEventListener("seeked", seek_complete);
                     resolve();
