@@ -54,20 +54,11 @@
     FrameGrab.prototype = {
         _calculate_scaled_dimensions: function(video, max_size) {
             var aspect_ratio = video.videoHeight / video.videoWidth,
-                scaled_size = aspect_ratio * max_size,
-                width = scaled_size,
-                height = scaled_size;
-
-            if (video.videoHeight >= video.videoWidth) {
-                height = max_size;
-            }
-            else {
-                width = max_size;
-            }
+                scaled_size = aspect_ratio * max_size;
 
             return {
-                height: height,
-                width: width
+                height: scaled_size,
+                width: max_size
             };
         },
 
