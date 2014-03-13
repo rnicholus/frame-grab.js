@@ -3,53 +3,53 @@
     var Promise = RSVP.Promise,
 
         FrameGrab = function(video, opt_frame_rate) {
-        if (!this._is_element(video, "video")) {
-            throw new Error("You must pass a valid <video>!");
-        }
-
-        var video_clone = this._clone_video(video),
-            clone_ready = new Promise(function(resolve, reject) {
-                video_clone.addEventListener("canplaythrough", function() {
-                    resolve();
-                });
-            });
-
-        this.grab = function(target_container, time) {
-            if (!this._is_element(target_container, "img") &&
-                !this._is_element(target_container, "canvas")) {
-
-                throw new Error("Target container must be an <img> or <canvas>!");
+            if (!this._is_element(video, "video")) {
+                throw new Error("You must pass a valid <video>!");
             }
 
-            var grab_deferred = new RSVP.defer(),
-                time_in_secs = this._normalize_time(time, opt_frame_rate);
+            var video_clone = this._clone_video(video),
+                clone_ready = new Promise(function(resolve, reject) {
+                    video_clone.addEventListener("canplaythrough", function() {
+                        resolve();
+                    });
+                });
 
-            clone_ready.then(function() {
-                this._seek(video_clone, time_in_secs).then(function() {
-                    var canvas = this._is_element(target_container, "canvas") ?
-                        target_container :
-                        document.createElement("canvas");
+            this.grab = function(target_container, time) {
+                if (!this._is_element(target_container, "img") &&
+                    !this._is_element(target_container, "canvas")) {
 
-                    this._draw(video_clone, canvas);
+                    throw new Error("Target container must be an <img> or <canvas>!");
+                }
 
-                    if (this._is_element(target_container, "canvas")) {
-                        grab_deferred.resolve(target_container);
-                    }
-                    else {
-                        target_container.onload = function() {
+                var grab_deferred = new RSVP.defer(),
+                    time_in_secs = this._normalize_time(time, opt_frame_rate);
+
+                clone_ready.then(function() {
+                    this._seek(video_clone, time_in_secs).then(function() {
+                        var canvas = this._is_element(target_container, "canvas") ?
+                            target_container :
+                            document.createElement("canvas");
+
+                        this._draw(video_clone, canvas);
+
+                        if (this._is_element(target_container, "canvas")) {
                             grab_deferred.resolve(target_container);
-                        };
-                        target_container.onerror = function() {
-                            grab_deferred.reject("Frame failed to load in <img>.");
-                        };
-                        target_container.src = canvas.toDataURL();
-                    }
+                        }
+                        else {
+                            target_container.onload = function() {
+                                grab_deferred.resolve(target_container);
+                            };
+                            target_container.onerror = function() {
+                                grab_deferred.reject("Frame failed to load in <img>.");
+                            };
+                            target_container.src = canvas.toDataURL();
+                        }
+                    }.bind(this));
                 }.bind(this));
-            }.bind(this));
 
-            return grab_deferred.promise;
+                return grab_deferred.promise;
+            };
         };
-    };
 
     FrameGrab.prototype = {
         // Most of this is a workaround for a bug in Chrome
