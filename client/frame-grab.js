@@ -14,7 +14,7 @@
                     });
                 });
 
-            this.grab = function(target_container, time) {
+            this.grab = function(target_container, time, opt_max_size) {
                 if (!this._is_element(target_container, "img") &&
                     !this._is_element(target_container, "canvas")) {
 
@@ -30,7 +30,7 @@
                             target_container :
                             document.createElement("canvas");
 
-                        this._draw(video_clone, canvas);
+                        this._draw(video_clone, canvas, opt_max_size);
 
                         if (this._is_element(target_container, "canvas")) {
                             grab_deferred.resolve(target_container);
@@ -52,6 +52,25 @@
         };
 
     FrameGrab.prototype = {
+        _calculate_scaled_dimensions: function(video, max_size) {
+            var aspect_ratio = video.videoHeight / video.videoWidth,
+                scaled_size = aspect_ratio * max_size,
+                width = scaled_size,
+                height = scaled_size;
+
+            if (video.videoHeight >= video.videoWidth) {
+                height = max_size;
+            }
+            else {
+                width = max_size;
+            }
+
+            return {
+                height: height,
+                width: width
+            };
+        },
+
         // Most of this is a workaround for a bug in Chrome
         // that causes the loading of the cloned video to stall
         _clone_video: function(video) {
@@ -83,13 +102,20 @@
             return clone;
         },
 
-        _draw: function(video, canvas) {
-            var context = canvas.getContext("2d");
+        _draw: function(video, canvas, opt_max_size) {
+            var context = canvas.getContext("2d"),
+                target_dim = {
+                    height: video.videoHeight,
+                    width: video.videoWidth
+                };
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            if (opt_max_size) {
+                target_dim = this._calculate_scaled_dimensions(video, opt_max_size);
+            }
+            canvas.width = target_dim.width;
+            canvas.height = target_dim.height;
 
-            context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+            context.drawImage(video, 0, 0, target_dim.width, target_dim.height);
 
             return canvas;
         },
