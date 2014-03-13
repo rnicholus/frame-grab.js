@@ -93,3 +93,17 @@ test("no-param URL", function() {
 test("existing-params URL", function() {
     ok(/^https:\/\/garstasio.com\/test\?param1=one&fgtimestamp=\d+$/.test(FrameGrab.prototype._uncacheable_url("https://garstasio.com/test?param1=one")));
 });
+
+
+module("_is_element");
+
+test("gracefully handles null or non-element", function() {
+    equal(FrameGrab.prototype._is_element(null, "div"), false);
+    equal(FrameGrab.prototype._is_element([], "div"), false);
+});
+
+test("identifies real elements", function() {
+    ok(FrameGrab.prototype._is_element(document.createElement("div"), "div"));
+    ok(FrameGrab.prototype._is_element(document.createElement("canvas"), "canvas"));
+    ok(!FrameGrab.prototype._is_element(document.createElement("div"), "span"));
+});
