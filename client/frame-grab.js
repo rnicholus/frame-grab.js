@@ -2,6 +2,7 @@
 
     var Promise = RSVP.Promise,
 
+        // TODO frame rate should not be optional
         FrameGrab = function(video, opt_frame_rate) {
             if (!this._is_element(video, "video")) {
                 throw new Error("You must pass a valid <video>!");
@@ -25,26 +26,40 @@
                     time_in_secs = this._normalize_time(time, opt_frame_rate);
 
                 clone_ready.then(function() {
-                    this._seek(video_clone, time_in_secs).then(function() {
-                        var canvas = this._is_element(target_container, "canvas") ?
-                            target_container :
-                            document.createElement("canvas");
+                    var canvas = this._is_element(target_container, "canvas") ?
+                        target_container :
+                        document.createElement("canvas");
 
-                        this._draw(video_clone, canvas, opt_max_size);
-
-                        if (this._is_element(target_container, "canvas")) {
-                            grab_deferred.resolve(target_container);
-                        }
-                        else {
-                            target_container.onload = function() {
+                    // TODO If a canvas is user-supplied, draw onto a temp canvas
+                    // and then draw the final image onto the passed canvas
+                    // to avoid flickering in case we need to adjust the time to
+                    // a non-solid frame.
+                    this._draw_specific_frame({
+                        canvas: canvas,
+                        frame_rate: opt_frame_rate,
+                        max_size: opt_max_size,
+                        time_in_secs: time_in_secs,
+                        video: video_clone
+                    }).then(
+                        function() {
+                            if (this._is_element(target_container, "canvas")) {
                                 grab_deferred.resolve(target_container);
-                            };
-                            target_container.onerror = function() {
-                                grab_deferred.reject("Frame failed to load in <img>.");
-                            };
-                            target_container.src = canvas.toDataURL();
+                            }
+                            else {
+                                target_container.onload = function() {
+                                    grab_deferred.resolve(target_container);
+                                };
+                                target_container.onerror = function() {
+                                    grab_deferred.reject("Frame failed to load in <img>.");
+                                };
+                                target_container.src = canvas.toDataURL();
+                            }
+                        }.bind(this),
+                        function() {
+                            //TODO handle failure
+                            console.log("TODO");
                         }
-                    }.bind(this));
+                    );
                 }.bind(this));
 
                 return grab_deferred.promise;
@@ -111,10 +126,76 @@
             return canvas;
         },
 
+        _draw_specific_frame: function(spec) {
+            var video = spec.video,
+                canvas = spec.canvas,
+                time_in_secs = spec.time_in_secs,
+                max_size = spec.max_size,
+                frame_rate = spec.frame_rate,
+                deferred = spec.deferred || RSVP.defer();
+
+            this._seek(video, time_in_secs).then(function() {
+                this._draw(video, canvas, max_size);
+
+                // TODO Make solid-color detection optional
+                if (this._is_solid_color(canvas)) {
+                    (function() {
+                        // TODO Make # of frames to jump configurable
+                        var one_frame_in_secs = this._normalize_time("5", frame_rate);
+                        spec.time_in_secs += one_frame_in_secs;
+                        spec.deferred = deferred;
+                        // TODO Fail if we have run out of frames in the video
+                        console.log("Found a solid frame, advancing 5 frames to find a non-solid one");
+                        this._draw_specific_frame(spec);
+                    }.bind(this)());
+                }
+                else {
+                    deferred.resolve(canvas);
+                }
+            }.bind(this));
+
+            return deferred.promise;
+        },
+
         _is_element: function(el, type) {
             return el != null &&
                 el.tagName != null &&
                 el.tagName.toLowerCase() === type;
+        },
+
+        // TODO Do a better job of detecting solid colors.
+        // That is, detect ALL solid colors and colors that are near-solid.
+        _is_solid_color: function(canvas) {
+            var context = canvas.getContext("2d"),
+                image_data = context.getImageData(0, 0, canvas.width, canvas.height),
+                pixel_data = image_data.data,
+                black_occurrences = 0,
+                pixel_index, red, green, blue, alpha;
+
+            for (var i = 0; i < pixel_data.length; i++) {
+                pixel_index = 4 * i;
+
+                red = pixel_data[pixel_index++];
+                green = pixel_data[pixel_index++];
+                blue = pixel_data[pixel_index++];
+                alpha = pixel_data[pixel_index];
+
+                // We only currently look for solid or near-solid black
+                // TODO consider making these values configurable
+                if (alpha === 255 &&
+                    Math.abs(red - green) < 30 &&
+                    Math.abs(green - blue) < 30) {
+
+                    black_occurrences++;
+                }
+            }
+
+            // If at least 95% of the frame is solid black, return true
+            // TODO consider making the quotient configurable
+            if (black_occurrences / (pixel_data.length / 4) > 0.95) {
+                return true;
+            }
+            return false;
         },
 
         _normalize_time: function(time, frame_rate) {
