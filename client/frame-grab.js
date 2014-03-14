@@ -141,8 +141,8 @@
                 if (this._is_solid_color(canvas)) {
                     (function() {
                         // TODO Make # of frames to jump configurable
-                        var one_frame_in_secs = this._normalize_time("5", frame_rate);
-                        spec.time_in_secs += one_frame_in_secs;
+                        var jump_frames_in_secs = this._normalize_time("5", frame_rate);
+                        spec.time_in_secs += jump_frames_in_secs;
                         spec.deferred = deferred;
                         // TODO Fail if we have run out of frames in the video
                         console.log("Found a solid frame, advancing 5 frames to find a non-solid one");
