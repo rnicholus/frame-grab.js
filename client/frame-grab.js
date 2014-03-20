@@ -28,23 +28,28 @@
                     time_in_secs = this._normalize_time(time, frame_rate);
 
                 clone_ready.then(function() {
-                    var canvas = this._is_element(target_container, "canvas") ?
-                        target_container :
-                        document.createElement("canvas");
+                    var temp_canvas = document.createElement("canvas");
 
-                    // TODO If a canvas is user-supplied, draw onto a temp canvas
-                    // and then draw the final image onto the passed canvas
-                    // to avoid flickering in case we need to adjust the time to
-                    // a non-solid frame.
                     this._draw_specific_frame({
-                        canvas: canvas,
+                        canvas: temp_canvas,
                         frame_rate: frame_rate,
                         max_size: opt_max_size,
                         time_in_secs: time_in_secs,
                         video: video_clone
                     }).then(
                         function() {
+                            // If a canvas is user-supplied, draw onto a temp canvas
+                            // and then draw the final image onto the passed canvas
+                            // to avoid flickering in case we need to adjust the time
+                            // to a non-solid frame.
                             if (this._is_element(target_container, "canvas")) {
+                                var target_context = target_container.getContext("2d");
+
+                                target_container.width = temp_canvas.width;
+                                target_container.height = temp_canvas.height;
+
+                                target_context.drawImage(temp_canvas, 0, 0);
+
                                 grab_deferred.resolve(target_container);
                             }
                             else {
@@ -54,7 +59,7 @@
                                 target_container.onerror = function() {
                                     grab_deferred.reject("Frame failed to load in <img>.");
                                 };
-                                target_container.src = canvas.toDataURL();
+                                target_container.src = temp_canvas.toDataURL();
                             }
                         }.bind(this),
                         function() {
