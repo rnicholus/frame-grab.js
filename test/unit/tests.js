@@ -68,11 +68,28 @@ test("Error if constructed without <video>", function() {
     });
 });
 
+test("Error if constructed without valid frame rate", function() {
+    var video = document.createElement("video");
+
+    /* jshint nonew:false */
+    throws(function() {
+        new FrameGrab(video);
+    });
+
+    throws(function() {
+        new FrameGrab(video, 0);
+    });
+
+    throws(function() {
+        new FrameGrab(video, -1);
+    });
+});
+
 
 module("grab");
 
 test("invalid target container param results in Error", function() {
-    var fg = new FrameGrab(document.createElement("video"));
+    var fg = new FrameGrab(document.createElement("video"), 1);
 
     throws(function() {
         fg.grab(document.createElement("div"), 1);

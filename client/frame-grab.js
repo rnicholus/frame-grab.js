@@ -2,10 +2,12 @@
 
     var Promise = RSVP.Promise,
 
-        // TODO frame rate should not be optional
-        FrameGrab = function(video, opt_frame_rate) {
+        FrameGrab = function(video, frame_rate) {
             if (!this._is_element(video, "video")) {
                 throw new Error("You must pass a valid <video>!");
+            }
+            if (!frame_rate || frame_rate < 0) {
+                throw new Error("Invalid frame rate of " + frame_rate);
             }
 
             var video_clone = this._clone_video(video),
@@ -23,7 +25,7 @@
                 }
 
                 var grab_deferred = new RSVP.defer(),
-                    time_in_secs = this._normalize_time(time, opt_frame_rate);
+                    time_in_secs = this._normalize_time(time, frame_rate);
 
                 clone_ready.then(function() {
                     var canvas = this._is_element(target_container, "canvas") ?
@@ -36,7 +38,7 @@
                     // a non-solid frame.
                     this._draw_specific_frame({
                         canvas: canvas,
-                        frame_rate: opt_frame_rate,
+                        frame_rate: frame_rate,
                         max_size: opt_max_size,
                         time_in_secs: time_in_secs,
                         video: video_clone
