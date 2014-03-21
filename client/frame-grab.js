@@ -11,7 +11,7 @@
             }
 
             var video_clone = this._clone_video(video),
-                clone_ready = new Promise(function(resolve, reject) {
+                clone_ready = new Promise(function(resolve) {
                     video_clone.addEventListener("canplaythrough", function() {
                         resolve();
                     });
@@ -37,6 +37,7 @@
                         time_in_secs: time_in_secs,
                         video: video_clone
                     }).then(
+                        // draw success
                         function() {
                             // If a canvas is user-supplied, draw onto a temp canvas
                             // and then draw the final image onto the passed canvas
@@ -62,10 +63,9 @@
                                 target_container.src = temp_canvas.toDataURL();
                             }
                         }.bind(this),
-                        function() {
-                            //TODO handle failure
-                            console.log("TODO");
-                        }
+
+                        // draw failure
+                        grab_deferred.reject
                     );
                 }.bind(this));
 
@@ -141,25 +141,31 @@
                 frame_rate = spec.frame_rate,
                 deferred = spec.deferred || RSVP.defer();
 
-            this._seek(video, time_in_secs).then(function() {
-                this._draw(video, canvas, max_size);
+            this._seek(video, time_in_secs).then(
+                // seek success
+                function() {
+                    this._draw(video, canvas, max_size);
 
-                // TODO Make solid-color detection optional
-                if (this._is_solid_color(canvas)) {
-                    (function() {
-                        // TODO Make # of frames to jump configurable
-                        var jump_frames_in_secs = this._normalize_time("5", frame_rate);
-                        spec.time_in_secs += jump_frames_in_secs;
-                        spec.deferred = deferred;
-                        // TODO Fail if we have run out of frames in the video
-                        console.log("Found a solid frame, advancing 5 frames to find a non-solid one");
-                        this._draw_specific_frame(spec);
-                    }.bind(this)());
-                }
-                else {
-                    deferred.resolve(canvas);
-                }
-            }.bind(this));
+                    // TODO Make solid-color detection optional
+                    if (this._is_solid_color(canvas)) {
+                        (function() {
+                            // TODO Make # of frames to jump configurable
+                            var jump_frames_in_secs = this._normalize_time("5", frame_rate);
+                            spec.time_in_secs += jump_frames_in_secs;
+                            spec.deferred = deferred;
+                            // TODO Fail if we have run out of frames in the video
+                            console.log("Found a solid frame, advancing 5 frames to find a non-solid one");
+                            this._draw_specific_frame(spec);
+                        }.bind(this)());
+                    }
+                    else {
+                        deferred.resolve(canvas);
+                    }
+                }.bind(this),
+
+                // seek failure
+                deferred.reject
+            );
 
             return deferred.promise;
         },
@@ -227,8 +233,13 @@
                     resolve();
                 };
 
-                video.addEventListener("seeked", seek_complete);
-                video.currentTime = secs;
+                if (video.duration < secs) {
+                    reject("Target time exceeds the video length");
+                }
+                else {
+                    video.addEventListener("seeked", seek_complete);
+                    video.currentTime = secs;
+                }
             });
         },
 
