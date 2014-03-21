@@ -1,4 +1,4 @@
-/* globals module, test, equal, ok, throws */
+/* globals module, test, equal, ok, throws, expect, start, asyncTest */
 module("_timecode_to_secs");
 
 test("invalid timecode throws error", function() {
