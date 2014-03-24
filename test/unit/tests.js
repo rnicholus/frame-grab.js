@@ -139,7 +139,8 @@ describe("_seek", function() {
     it("seeks to a valid time", function(done) {
         var video = document.getElementById("test-video");
 
-        setTimeout(function() {
+        // TODO wait for canplaythough instead of this silly timeout
+        window.setTimeout(function() {
             FrameGrab.prototype._seek(video, 1).then(function() {
                 expect(video.currentTime).toEqual(1);
                 done();
