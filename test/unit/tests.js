@@ -122,15 +122,15 @@ describe("_seek", function() {
         var videoInnerHtml = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?randomstr=12124\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">",
             video = document.createElement("video");
 
+        video.addEventListener("canplay", function() {
+            done();
+        });
+
         video.id = "test-video";
         video.crossOrigin = "anonymous";
         video.innerHTML = videoInnerHtml;
 
         document.getElementsByTagName("body")[0].appendChild(video);
-
-        video.addEventListener("canplay", function() {
-            done();
-        });
     });
 
     afterEach(function() {
