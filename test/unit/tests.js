@@ -127,7 +127,6 @@ describe("_seek", function() {
             done();
         });
 
-        this.videoEl.id = "test-video";
         this.videoEl.crossOrigin = "anonymous";
         this.videoEl.innerHTML = videoInnerHtml;
 
