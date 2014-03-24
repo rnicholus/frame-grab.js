@@ -118,7 +118,7 @@ describe("_is_element", function() {
 });
 
 describe("_seek", function() {
-    beforeEach(function() {
+    beforeEach(function(done) {
         var videoInnerHtml = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?randomstr=12124\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">",
             video = document.createElement("video");
 
@@ -127,6 +127,10 @@ describe("_seek", function() {
         video.innerHTML = videoInnerHtml;
 
         document.getElementsByTagName("body")[0].appendChild(video);
+
+        video.addEventListener("t", function() {
+            done();
+        });
     });
 
     afterEach(function() {
@@ -139,11 +143,9 @@ describe("_seek", function() {
     it("seeks to a valid time", function(done) {
         var video = document.getElementById("test-video");
 
-        video.addEventListener("canplaythrough", function() {
-            FrameGrab.prototype._seek(video, 1).then(function() {
-                expect(video.currentTime).toEqual(1);
-                done();
-            });
+        FrameGrab.prototype._seek(video, 1).then(function() {
+            expect(video.currentTime).toEqual(1);
+            done();
         });
     });
 });
