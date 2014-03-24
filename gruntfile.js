@@ -5,22 +5,22 @@ function config(name) {
 
 module.exports = function(grunt) {
     grunt.initConfig({
+        connect: config("connect"),
         pkg: grunt.file.readJSON("package.json"),
         jshint: config("jshint"),
-        qunit: config("qunit"),
+        karma: config("karma"),
         watch: {
             files: ["client/*.js", "test/unit/*"],
-            tasks: ["jshint", "qunit"]
+            tasks: ["jshint", "karma:dev"]
         }
     });
 
+    grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-contrib-qunit");
     grunt.loadNpmTasks("grunt-contrib-watch");
+    grunt.loadNpmTasks("grunt-karma");
 
-
-    grunt.registerTask("default", ["test", "watch"]);
-    grunt.registerTask("dist", ["jshint", "qunit"]);
-    grunt.registerTask("test", ["qunit"]);
-    grunt.registerTask("travis", ["test"]);
+    grunt.registerTask("default", ["jshint", "connect", "karma:dev", "watch"]);
+    grunt.registerTask("travis", ["jshint", "connect", "karma:travis"]);
 };

@@ -1,10 +1,23 @@
 {
-    "name": "frame-grab",
-    "version": "0.0.1",
+    "description": "Do cool and useful things with videos using canvas",
     "devDependencies": {
         "grunt": "0.4.x",
+        "grunt-contrib-concat": "0.3.x",
+        "grunt-contrib-connect": "0.7.1",
         "grunt-contrib-jshint": "0.8.x",
         "grunt-contrib-watch": "0.5.x",
-        "grunt-contrib-qunit": "0.2.x"
-    }
+        "grunt-karma": "~0.8.2",
+        "grunt-nodestatic": "0.1.2",
+        "karma": "~0.12.0",
+        "karma-chrome-launcher": "~0.1.2",
+        "karma-firefox-launcher": "~0.1.2",
+        "karma-jasmine": "~0.2.0",
+        "karma-script-launcher": "~0.1.0"
+    },
+    "name": "frame-grab",
+    "repository": {
+        "type" : "git",
+        "url" : "https://github.com/rnicholus/frame-grab.git"
+    },
+    "version": "0.0.1"
 }

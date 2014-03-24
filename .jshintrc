@@ -40,5 +40,16 @@
     "shadow": false,
     "sub": true,
     "supernew": false,
-    "predef": ["document", "$", "console", "window", "FrameGrab", "RSVP"]
+    "predef": [
+        "afterEach",
+        "beforeEach",
+        "console",
+        "describe",
+        "document",
+        "expect",
+        "FrameGrab",
+        "it",
+        "RSVP",
+        "window"
+    ]
 }
