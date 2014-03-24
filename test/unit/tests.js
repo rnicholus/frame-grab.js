@@ -119,33 +119,29 @@ describe("_is_element", function() {
 
 describe("_seek", function() {
     beforeEach(function(done) {
-        var videoInnerHtml = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?randomstr=12124\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">",
-            video = document.createElement("video");
+        var videoInnerHtml = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?randomstr=12124\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">";
 
-        video.addEventListener("canplay", function() {
+        this.videoEl = document.createElement("video");
+
+        this.videoEl.addEventListener("canplay", function() {
             done();
         });
 
-        video.id = "test-video";
-        video.crossOrigin = "anonymous";
-        video.innerHTML = videoInnerHtml;
+        this.videoEl.id = "test-video";
+        this.videoEl.crossOrigin = "anonymous";
+        this.videoEl.innerHTML = videoInnerHtml;
 
-        document.getElementsByTagName("body")[0].appendChild(video);
+        document.getElementsByTagName("body")[0].appendChild(this.videoEl);
     });
 
     afterEach(function() {
-        var videoEl = document.getElementById("test-video"),
-            bodyEl = document.getElementsByTagName("body")[0];
-
-        bodyEl.removeChild(videoEl);
+        this.videoEl.parentNode.removeChild(this.videoEl);
     });
 
     it("seeks to a valid time", function(done) {
-        var video = document.getElementById("test-video");
-
-        FrameGrab.prototype._seek(video, 1).then(function() {
-            expect(video.currentTime).toEqual(1);
+        FrameGrab.prototype._seek(this.videoEl, 1).then(function() {
+            expect(this.videoEl.currentTime).toEqual(1);
             done();
-        });
+        }.bind(this));
     });
 });
