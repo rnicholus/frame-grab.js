@@ -128,7 +128,7 @@ describe("_seek", function() {
 
         document.getElementsByTagName("body")[0].appendChild(video);
 
-        video.addEventListener("t", function() {
+        video.addEventListener("canplay", function() {
             done();
         });
     });
