@@ -138,9 +138,9 @@ describe("_seek", function() {
     });
 
     it("seeks to a valid time", function(done) {
-        FrameGrab.prototype._seek(this.videoEl, 1).then(function() {
-            expect(this.videoEl.currentTime).toEqual(1);
+        FrameGrab.prototype._seek(this.videoEl, 1).then(function(videoEl) {
+            expect(videoEl.currentTime).toEqual(1);
             done();
-        }.bind(this));
+        });
     });
 });

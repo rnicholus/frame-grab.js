@@ -230,7 +230,7 @@
             return new Promise(function(resolve, reject) {
                 var seek_complete = function() {
                     video.removeEventListener("seeked", seek_complete);
-                    resolve();
+                    resolve(video);
                 };
 
                 if (video.duration < secs) {
