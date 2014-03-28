@@ -118,29 +118,71 @@ describe("_is_element", function() {
 });
 
 describe("_seek", function() {
+    var expected_video_height = 360,
+        expected_video_width = 640;
+
     beforeEach(function(done) {
-        var videoInnerHtml = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?randomstr=12124\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">";
+        var timestamp = Date.now(),
+            video_inner_html = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?testtimestamp=" + timestamp + "\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">",
+            done_callback = function() {
+                this.video_el.removeEventListener("canplay", done_callback);
+                done();
+            }.bind(this);
 
-        this.videoEl = document.createElement("video");
+        this.video_el = document.createElement("video");
 
-        this.videoEl.addEventListener("canplay", function() {
-            done();
-        });
+        this.video_el.addEventListener("canplay", done_callback);
 
-        this.videoEl.crossOrigin = "anonymous";
-        this.videoEl.innerHTML = videoInnerHtml;
+        this.video_el.crossOrigin = "anonymous";
+        this.video_el.innerHTML = video_inner_html;
 
-        document.getElementsByTagName("body")[0].appendChild(this.videoEl);
+        document.getElementsByTagName("body")[0].appendChild(this.video_el);
     });
 
     afterEach(function() {
-        this.videoEl.parentNode.removeChild(this.videoEl);
+        this.video_el.parentNode.removeChild(this.video_el);
     });
 
     it("seeks to a valid time", function(done) {
-        FrameGrab.prototype._seek(this.videoEl, 1).then(function(videoEl) {
+        FrameGrab.prototype._seek(this.video_el, 1).then(function(videoEl) {
             expect(videoEl.currentTime).toEqual(1);
             done();
         });
+    });
+
+    it("properly calculates scaled dimensions for a video", function() {
+        var dimensions1 = FrameGrab.prototype._calculate_scaled_dimensions(this.video_el, 100),
+            dimensions2 = FrameGrab.prototype._calculate_scaled_dimensions(this.video_el, 641);
+
+        expect(dimensions1).toEqual({
+            height: (expected_video_height / expected_video_width) * 100,
+            width: 100
+        });
+
+        expect(dimensions2).toEqual({
+            height: expected_video_height,
+            width: expected_video_width
+        });
+    });
+
+    it("clones a video", function() {
+        var clone = FrameGrab.prototype._clone_video(this.video_el);
+
+        expect(clone).not.toEqual(this.video_el);
+        expect(clone.tagName.toLowerCase()).toEqual("video");
+    });
+
+    it("draws a frame onto a canvas", function() {
+        var canvas = document.createElement("canvas"),
+            last_data_url = canvas.toDataURL();
+
+        FrameGrab.prototype._draw(this.video_el, canvas);
+        expect(last_data_url).not.toEqual(canvas.toDataURL());
+        last_data_url = canvas.toDataURL();
+
+        FrameGrab.prototype._draw(this.video_el, canvas, 100);
+        expect(last_data_url).not.toEqual(canvas.toDataURL());
+        expect(canvas.width).toEqual(100);
+        expect(canvas.height).toEqual(Math.round((expected_video_height / expected_video_width) * 100));
     });
 });
