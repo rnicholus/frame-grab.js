@@ -168,7 +168,8 @@ describe("_seek", function() {
     it("clones a video", function() {
         var clone = FrameGrab.prototype._clone_video(this.video_el);
 
-        expect(clone).not.toEqual(this.video_el);
+        expect(clone.children[0].src).not.toEqual(this.video_el.children[0].src);
+        expect(clone.children[1].src).not.toEqual(this.video_el.children[1].src);
         expect(clone.tagName.toLowerCase()).toEqual("video");
     });
 
