@@ -67,22 +67,22 @@ describe("constructor", function() {
 
         /* jshint nonew:false */
         expect(function() {
-            new FrameGrab(video);
+            new FrameGrab({video: video});
         }).toThrow();
 
         expect(function() {
-            new FrameGrab(video, 0);
+            new FrameGrab({video: video, frame_rate: 0});
         }).toThrow();
 
         expect(function() {
-            new FrameGrab(video, -1);
+            new FrameGrab({video: video, frame_rate: -1});
         }).toThrow();
     });
 });
 
 describe("grab", function() {
     it("throws an Error on an invalid target container param", function() {
-        var fg = new FrameGrab(document.createElement("video"), 1);
+        var fg = new FrameGrab({video: document.createElement("video"), frame_rate: 1});
 
         expect(function() {
             fg.grab(document.createElement("div"), 1);
@@ -117,7 +117,7 @@ describe("_is_element", function() {
     });
 });
 
-describe("_seek", function() {
+describe("isolated prototype methods", function() {
     var expected_video_height = 360,
         expected_video_width = 640;
 
@@ -185,5 +185,82 @@ describe("_seek", function() {
         expect(last_data_url).not.toEqual(canvas.toDataURL());
         expect(canvas.width).toEqual(100);
         expect(canvas.height).toEqual(Math.round((expected_video_height / expected_video_width) * 100));
+    });
+});
+
+describe("constructed instance", function() {
+    beforeEach(function() {
+        var timestamp = Date.now(),
+            video_inner_html = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?testtimestamp=" + timestamp + "\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">";
+
+        this.video_el = document.createElement("video");
+
+        this.video_el.crossOrigin = "anonymous";
+        this.video_el.innerHTML = video_inner_html;
+
+        document.getElementsByTagName("body")[0].appendChild(this.video_el);
+    });
+
+    afterEach(function() {
+        this.video_el.parentNode.removeChild(this.video_el);
+    });
+
+    it("does not attempt to skip past solid frames if not enabled via options", function(done) {
+        var fg = new FrameGrab({
+            video: this.video_el,
+            frame_rate: 30
+        });
+
+        spyOn(fg, "_is_solid_color");
+        fg.grab(document.createElement("canvas"), 1).then(function() {
+            expect(fg._is_solid_color).not.toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it("attempts to skip past 5 solid frames at a time if enabled via options", function(done) {
+        var fg = new FrameGrab({
+                video: this.video_el,
+                frame_rate: 30,
+                skip_solids: {
+                    enabled: true
+                }
+            });
+
+        spyOn(fg, "_normalize_time").and.callThrough();
+
+        fg.grab(document.createElement("canvas"), "0:30").then(function() {
+            expect(fg._normalize_time.calls.count()).toEqual(5);
+            expect(fg._normalize_time.calls.argsFor(1)).toEqual(["5", 30]);
+            expect(fg._normalize_time.calls.argsFor(2)).toEqual(["5", 30]);
+            expect(fg._normalize_time.calls.argsFor(3)).toEqual(["5", 30]);
+            expect(fg._normalize_time.calls.argsFor(4)).toEqual(["5", 30]);
+            done();
+        });
+    });
+
+    it("attempts to skip past user-supplied solid frames at a time if enabled via options", function(done) {
+        var fg = new FrameGrab({
+            video: this.video_el,
+            frame_rate: 30,
+            skip_solids: {
+                enabled: true,
+                frames: 3
+            }
+        });
+
+        spyOn(fg, "_normalize_time").and.callThrough();
+
+        fg.grab(document.createElement("canvas"), "0:30").then(function() {
+            expect(fg._normalize_time.calls.count()).toEqual(8);
+            expect(fg._normalize_time.calls.argsFor(1)).toEqual(["3", 30]);
+            expect(fg._normalize_time.calls.argsFor(2)).toEqual(["3", 30]);
+            expect(fg._normalize_time.calls.argsFor(3)).toEqual(["3", 30]);
+            expect(fg._normalize_time.calls.argsFor(4)).toEqual(["3", 30]);
+            expect(fg._normalize_time.calls.argsFor(5)).toEqual(["3", 30]);
+            expect(fg._normalize_time.calls.argsFor(6)).toEqual(["3", 30]);
+            expect(fg._normalize_time.calls.argsFor(7)).toEqual(["3", 30]);
+            done();
+        });
     });
 });

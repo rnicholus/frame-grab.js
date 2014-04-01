@@ -2,15 +2,25 @@
 
     var Promise = RSVP.Promise,
 
-        FrameGrab = function(video, frame_rate) {
-            if (!this._is_element(video, "video")) {
+        /**
+         * Supported options object properties:
+         *
+         * - `video`: (HTMLVideoElement) - [REQUIRED] The source video
+         * - `frame_rate`: (Float) - [REQUIRED] The frame rate of the video
+         * - `skip_solids.enabled`: (Boolean) - [false] True if you want to skip past frames that are mostly solid
+         * - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found
+         */
+        FrameGrab = function(user_passed_opts) {
+            var options = this._normalize_options(user_passed_opts);
+
+            if (!this._is_element(options.video, "video")) {
                 throw new Error("You must pass a valid <video>!");
             }
-            if (!frame_rate || frame_rate < 0) {
-                throw new Error("Invalid frame rate of " + frame_rate);
+            if (!options.frame_rate || options.frame_rate < 0) {
+                throw new Error("Invalid frame rate of " + options.frame_rate);
             }
 
-            var video_clone = this._clone_video(video),
+            var video_clone = this._clone_video(options.video),
                 clone_ready = new Promise(function(resolve) {
                     video_clone.addEventListener("canplaythrough", function() {
                         resolve();
@@ -25,15 +35,16 @@
                 }
 
                 var grab_deferred = new RSVP.defer(),
-                    time_in_secs = this._normalize_time(time, frame_rate);
+                    time_in_secs = this._normalize_time(time, options.frame_rate);
 
                 clone_ready.then(function() {
                     var temp_canvas = document.createElement("canvas");
 
                     this._draw_specific_frame({
                         canvas: temp_canvas,
-                        frame_rate: frame_rate,
+                        frame_rate: options.frame_rate,
                         max_size: opt_max_size,
+                        skip_solids: options.skip_solids,
                         time_in_secs: time_in_secs,
                         video: video_clone
                     }).then(
@@ -141,23 +152,25 @@
         },
 
         _draw_specific_frame: function(spec) {
-            var video = spec.video,
-                canvas = spec.canvas,
-                time_in_secs = spec.time_in_secs,
-                max_size = spec.max_size,
+            var canvas = spec.canvas,
+                deferred = spec.deferred || RSVP.defer(),
                 frame_rate = spec.frame_rate,
-                deferred = spec.deferred || RSVP.defer();
+                frames_to_skip = spec.skip_solids.frames.toString(),
+                max_size = spec.max_size,
+                skip_solids = spec.skip_solids.enabled,
+                time_in_secs = spec.time_in_secs,
+                video = spec.video;
 
             this._seek(video, time_in_secs).then(
                 // seek success
                 function() {
                     this._draw(video, canvas, max_size);
 
-                    // TODO Make solid-color detection optional
-                    if (this._is_solid_color(canvas)) {
+                    if (skip_solids && this._is_solid_color(canvas)) {
                         (function() {
-                            // TODO Make # of frames to jump configurable
-                            var jump_frames_in_secs = this._normalize_time("5", frame_rate);
+                            var jump_frames_in_secs =
+                                this._normalize_time(frames_to_skip, frame_rate);
+
                             spec.time_in_secs += jump_frames_in_secs;
                             spec.deferred = deferred;
                             // TODO Fail if we have run out of frames in the video
@@ -216,6 +229,26 @@
                 return true;
             }
             return false;
+        },
+
+        _normalize_options: function(user_passed_options) {
+            var options = {
+                video: user_passed_options.video,
+                frame_rate: user_passed_options.frame_rate,
+                skip_solids: {
+                    enabled: false,
+                    frames: 5
+                }
+            };
+
+            if (user_passed_options.skip_solids) {
+                options.skip_solids.enabled = user_passed_options.skip_solids.enabled;
+
+                options.skip_solids.frames = user_passed_options.skip_solids.frames ||
+                    options.skip_solids.frames;
+            }
+
+            return options;
         },
 
         _normalize_time: function(time, frame_rate) {

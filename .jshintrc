@@ -50,6 +50,7 @@
         "FrameGrab",
         "it",
         "RSVP",
+        "spyOn",
         "window"
     ]
 }
