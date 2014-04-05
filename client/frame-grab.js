@@ -173,7 +173,6 @@
 
                             spec.time_in_secs += jump_frames_in_secs;
                             spec.deferred = deferred;
-                            // TODO Fail if we have run out of frames in the video
                             console.log("Found a solid frame, advancing 5 frames to find a non-solid one");
                             this._draw_specific_frame(spec);
                         }.bind(this)());
@@ -182,9 +181,10 @@
                         deferred.resolve(canvas);
                     }
                 }.bind(this),
-
-                // seek failure
-                deferred.reject
+                function() {
+                    console.error("Failed to seek in _draw_specific_frame!");
+                    deferred.reject("Seek failure!");
+                }
             );
 
             return deferred.promise;

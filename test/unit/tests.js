@@ -117,109 +117,107 @@ describe("_is_element", function() {
     });
 });
 
-describe("isolated prototype methods", function() {
-    var expected_video_height = 360,
-        expected_video_width = 640;
-
-    beforeEach(function(done) {
+describe("live video tests", function() {
+    function setupVideo(name) {
         var timestamp = Date.now(),
-            video_inner_html = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?testtimestamp=" + timestamp + "\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">",
-            done_callback = function() {
-                this.video_el.removeEventListener("canplay", done_callback);
-                done();
-            }.bind(this);
+            video_inner_html = "<source src=\"http://localhost:3000/" + name + ".mp4?testtimestamp=" + timestamp + "\" type=\"video/mp4\"><source src=\"http://localhost:3000/" + name + ".ogv\" type=\"video/ogg\">";
 
         this.video_el = document.createElement("video");
-
-        this.video_el.addEventListener("canplay", done_callback);
-
         this.video_el.crossOrigin = "anonymous";
         this.video_el.innerHTML = video_inner_html;
 
         document.getElementsByTagName("body")[0].appendChild(this.video_el);
-    });
+    }
 
-    afterEach(function() {
+    function cleanupVideo() {
+        this.video_el.src = "";
         this.video_el.parentNode.removeChild(this.video_el);
-    });
+    }
 
-    it("seeks to a valid time", function(done) {
-        FrameGrab.prototype._seek(this.video_el, 1).then(function(videoEl) {
-            expect(videoEl.currentTime).toEqual(1);
-            done();
+
+    describe("isolated prototype methods", function() {
+        var expected_video_height = 360,
+            expected_video_width = 640;
+
+        beforeEach(function(done) {
+            var done_callback = function() {
+                    this.video_el.removeEventListener("canplay", done_callback);
+                    done();
+                }.bind(this);
+
+            setupVideo.call(this, "big_buck_bunny");
+            this.video_el.addEventListener("canplay", done_callback);
         });
-    });
 
-    it("properly calculates scaled dimensions for a video", function() {
-        var dimensions1 = FrameGrab.prototype._calculate_scaled_dimensions(this.video_el, 100),
-            dimensions2 = FrameGrab.prototype._calculate_scaled_dimensions(this.video_el, 641);
+        afterEach(cleanupVideo);
 
-        expect(dimensions1).toEqual({
-            height: (expected_video_height / expected_video_width) * 100,
-            width: 100
+        it("seeks to a valid time", function(done) {
+            FrameGrab.prototype._seek(this.video_el, 1).then(function(videoEl) {
+                expect(videoEl.currentTime).toEqual(1);
+                done();
+            });
         });
 
-        expect(dimensions2).toEqual({
-            height: expected_video_height,
-            width: expected_video_width
+        it("properly calculates scaled dimensions for a video", function() {
+            var dimensions1 = FrameGrab.prototype._calculate_scaled_dimensions(this.video_el, 100),
+                dimensions2 = FrameGrab.prototype._calculate_scaled_dimensions(this.video_el, 641);
+
+            expect(dimensions1).toEqual({
+                height: (expected_video_height / expected_video_width) * 100,
+                width: 100
+            });
+
+            expect(dimensions2).toEqual({
+                height: expected_video_height,
+                width: expected_video_width
+            });
         });
-    });
 
-    it("clones a video", function() {
-        var clone = FrameGrab.prototype._clone_video(this.video_el);
+        it("clones a video", function() {
+            var clone = FrameGrab.prototype._clone_video(this.video_el);
 
-        expect(clone.children[0].src).not.toEqual(this.video_el.children[0].src);
-        expect(clone.children[1].src).not.toEqual(this.video_el.children[1].src);
-        expect(clone.tagName.toLowerCase()).toEqual("video");
-    });
+            expect(clone.children[0].src).not.toEqual(this.video_el.children[0].src);
+            expect(clone.children[1].src).not.toEqual(this.video_el.children[1].src);
+            expect(clone.tagName.toLowerCase()).toEqual("video");
+        });
 
-    it("draws a frame onto a canvas", function() {
-        var canvas = document.createElement("canvas"),
+        it("draws a frame onto a canvas", function() {
+            var canvas = document.createElement("canvas"),
+                last_data_url = canvas.toDataURL();
+
+            FrameGrab.prototype._draw(this.video_el, canvas);
+            expect(last_data_url).not.toEqual(canvas.toDataURL());
             last_data_url = canvas.toDataURL();
 
-        FrameGrab.prototype._draw(this.video_el, canvas);
-        expect(last_data_url).not.toEqual(canvas.toDataURL());
-        last_data_url = canvas.toDataURL();
-
-        FrameGrab.prototype._draw(this.video_el, canvas, 100);
-        expect(last_data_url).not.toEqual(canvas.toDataURL());
-        expect(canvas.width).toEqual(100);
-        expect(canvas.height).toEqual(Math.round((expected_video_height / expected_video_width) * 100));
-    });
-});
-
-describe("constructed instance", function() {
-    beforeEach(function() {
-        var timestamp = Date.now(),
-            video_inner_html = "<source src=\"http://localhost:3000/big_buck_bunny.mp4?testtimestamp=" + timestamp + "\" type=\"video/mp4\"><source src=\"http://localhost:3000/big_buck_bunny.ogv\" type=\"video/ogg\">";
-
-        this.video_el = document.createElement("video");
-
-        this.video_el.crossOrigin = "anonymous";
-        this.video_el.innerHTML = video_inner_html;
-
-        document.getElementsByTagName("body")[0].appendChild(this.video_el);
-    });
-
-    afterEach(function() {
-        this.video_el.parentNode.removeChild(this.video_el);
-    });
-
-    it("does not attempt to skip past solid frames if not enabled via options", function(done) {
-        var fg = new FrameGrab({
-            video: this.video_el,
-            frame_rate: 30
-        });
-
-        spyOn(fg, "_is_solid_color");
-        fg.grab(document.createElement("canvas"), 1).then(function() {
-            expect(fg._is_solid_color).not.toHaveBeenCalled();
-            done();
+            FrameGrab.prototype._draw(this.video_el, canvas, 100);
+            expect(last_data_url).not.toEqual(canvas.toDataURL());
+            expect(canvas.width).toEqual(100);
+            expect(canvas.height).toEqual(Math.round((expected_video_height / expected_video_width) * 100));
         });
     });
 
-    it("attempts to skip past 5 solid frames at a time if enabled via options", function(done) {
-        var fg = new FrameGrab({
+    describe("constructed instance", function() {
+        beforeEach(function() {
+            setupVideo.call(this, "big_buck_bunny");
+        });
+
+        afterEach(cleanupVideo);
+
+        it("does not attempt to skip past solid frames if not enabled via options", function(done) {
+            var fg = new FrameGrab({
+                video: this.video_el,
+                frame_rate: 30
+            });
+
+            spyOn(fg, "_is_solid_color");
+            fg.grab(document.createElement("canvas"), 1).then(function() {
+                expect(fg._is_solid_color).not.toHaveBeenCalled();
+                done();
+            });
+        });
+
+        it("attempts to skip past 5 solid frames at a time if enabled via options", function(done) {
+            var fg = new FrameGrab({
                 video: this.video_el,
                 frame_rate: 30,
                 skip_solids: {
@@ -227,40 +225,67 @@ describe("constructed instance", function() {
                 }
             });
 
-        spyOn(fg, "_normalize_time").and.callThrough();
+            spyOn(fg, "_normalize_time").and.callThrough();
 
-        fg.grab(document.createElement("canvas"), "0:30").then(function() {
-            expect(fg._normalize_time.calls.count()).toEqual(5);
-            expect(fg._normalize_time.calls.argsFor(1)).toEqual(["5", 30]);
-            expect(fg._normalize_time.calls.argsFor(2)).toEqual(["5", 30]);
-            expect(fg._normalize_time.calls.argsFor(3)).toEqual(["5", 30]);
-            expect(fg._normalize_time.calls.argsFor(4)).toEqual(["5", 30]);
-            done();
+            fg.grab(document.createElement("canvas"), "0:30").then(function() {
+                expect(fg._normalize_time.calls.count()).toEqual(5);
+                expect(fg._normalize_time.calls.argsFor(1)).toEqual(["5", 30]);
+                expect(fg._normalize_time.calls.argsFor(2)).toEqual(["5", 30]);
+                expect(fg._normalize_time.calls.argsFor(3)).toEqual(["5", 30]);
+                expect(fg._normalize_time.calls.argsFor(4)).toEqual(["5", 30]);
+                done();
+            });
+        });
+
+        it("attempts to skip past user-supplied solid frames at a time if enabled via options", function(done) {
+            var fg = new FrameGrab({
+                video: this.video_el,
+                frame_rate: 30,
+                skip_solids: {
+                    enabled: true,
+                    frames: 3
+                }
+            });
+
+            spyOn(fg, "_normalize_time").and.callThrough();
+
+            fg.grab(document.createElement("canvas"), "0:30").then(function() {
+                expect(fg._normalize_time.calls.count()).toEqual(8);
+                expect(fg._normalize_time.calls.argsFor(1)).toEqual(["3", 30]);
+                expect(fg._normalize_time.calls.argsFor(2)).toEqual(["3", 30]);
+                expect(fg._normalize_time.calls.argsFor(3)).toEqual(["3", 30]);
+                expect(fg._normalize_time.calls.argsFor(4)).toEqual(["3", 30]);
+                expect(fg._normalize_time.calls.argsFor(5)).toEqual(["3", 30]);
+                expect(fg._normalize_time.calls.argsFor(6)).toEqual(["3", 30]);
+                expect(fg._normalize_time.calls.argsFor(7)).toEqual(["3", 30]);
+                done();
+            });
         });
     });
 
-    it("attempts to skip past user-supplied solid frames at a time if enabled via options", function(done) {
-        var fg = new FrameGrab({
-            video: this.video_el,
-            frame_rate: 30,
-            skip_solids: {
-                enabled: true,
-                frames: 3
-            }
+    describe("non-solid frame skip failures", function() {
+        beforeEach(function() {
+            setupVideo.call(this, "black_screen_test");
         });
 
-        spyOn(fg, "_normalize_time").and.callThrough();
+        afterEach(cleanupVideo);
 
-        fg.grab(document.createElement("canvas"), "0:30").then(function() {
-            expect(fg._normalize_time.calls.count()).toEqual(8);
-            expect(fg._normalize_time.calls.argsFor(1)).toEqual(["3", 30]);
-            expect(fg._normalize_time.calls.argsFor(2)).toEqual(["3", 30]);
-            expect(fg._normalize_time.calls.argsFor(3)).toEqual(["3", 30]);
-            expect(fg._normalize_time.calls.argsFor(4)).toEqual(["3", 30]);
-            expect(fg._normalize_time.calls.argsFor(5)).toEqual(["3", 30]);
-            expect(fg._normalize_time.calls.argsFor(6)).toEqual(["3", 30]);
-            expect(fg._normalize_time.calls.argsFor(7)).toEqual(["3", 30]);
-            done();
+        it("fails if the video ends before a non-solid frame is encountered", function (done) {
+            var fg = new FrameGrab({
+                video: this.video_el,
+                frame_rate: 24,
+                skip_solids: {
+                    enabled: true
+                }
+            });
+
+            spyOn(fg, "_is_solid_color").and.callThrough();
+            fg.grab(document.createElement("canvas"), 0).then(
+                function success() {/* should not be hit */},
+                function failure() {
+                    expect(fg._is_solid_color).toHaveBeenCalled();
+                    done();
+                });
         });
     });
 });
