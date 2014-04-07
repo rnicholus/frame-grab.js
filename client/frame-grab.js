@@ -118,7 +118,7 @@
                         currentElement, srcAttr, idx;
 
                     for (idx = 0; idx < source_els.length; idx++) {
-                        currentElement = source_els[idx],
+                        currentElement = source_els[idx];
                         srcAttr = currentElement.getAttribute("src");
 
                         if (srcAttr) {
@@ -200,6 +200,8 @@
 
         // That is, detect ALL solid colors and colors that are near-solid.
         _is_solid_color: function(video, max_solid_ratio) {
+                // re-draw the frame onto the canvas at a minimal size
+                // to speed up image data parsing
             var canvas = this._draw(video, document.createElement("canvas"), 10),
                 context = canvas.getContext("2d"),
                 image_data = context.getImageData(0, 0, canvas.width, canvas.height),
@@ -225,10 +227,7 @@
             }
 
             // If at least 95% of the frame is solid black, return true
-            if (solid_occurrences / (pixel_data.length / 4) > max_solid_ratio) {
-                return true;
-            }
-            return false;
+            return (solid_occurrences / (pixel_data.length / 4) > max_solid_ratio);
         },
 
         _normalize_options: function(user_passed_options) {
