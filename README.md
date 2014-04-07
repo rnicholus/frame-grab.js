@@ -8,10 +8,11 @@ frame-grab.js
 
 
 ###Getting started
-Simply include both frame-grab.js, the RSVP promise library, and a source video on your page.
-See the [index.html file in the test directory][testindex] for a simple example.
-Please note that, while frame-grab is functional, it is not yet complete.  See the
-[issue tracker][issues] for information and progress on upcoming features.
+Simply include both frame-grab.js, the [RSVP promise library][rsvp], and a source video
+on your page.  See the [index.html file in the test directory][testindex]
+for a simple example.  Please note that, while frame-grab is functional, it is not
+yet complete.  See the [issue tracker][issues] for information and progress
+on upcoming features.
 
 ###API
 To construct an instance, you must pass an `Object` with some configuration options.
@@ -75,5 +76,6 @@ for your video, simply by seeking to that frame in the player and calling this m
 
 [issues]: https://github.com/rnicholus/frame-grab.js/issues
 [promise]: http://promises-aplus.github.io/promises-spec/
+[rsvp]: https://github.com/tildeio/rsvp.js/tree/master
 [testindex]: https://github.com/rnicholus/frame-grab.js/blob/master/test/index.html
 [timecode]: https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=5%26tasks=true
