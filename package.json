@@ -1,4 +1,8 @@
 {
+    "author": {
+        "name": "Ray Nicholus"
+    },
+    "bugs": "https://github.com/rnicholus/frame-grab.js/issues",
     "description": "Do cool and useful things with videos using canvas",
     "devDependencies": {
         "grunt": "0.4.x",
@@ -14,6 +18,7 @@
         "karma-jasmine": "~0.2.0",
         "karma-script-launcher": "~0.1.0"
     },
+    "license": "AGPL-3.0",
     "name": "frame-grab",
     "repository": {
         "type" : "git",
