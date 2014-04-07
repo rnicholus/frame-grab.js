@@ -7,8 +7,9 @@
          *
          * - `video`: (HTMLVideoElement) - [REQUIRED] The source video
          * - `frame_rate`: (Float) - [REQUIRED] The frame rate of the video
-         * - `skip_solids.enabled`: (Boolean) - [false] True if you want to skip past frames that are mostly solid
-         * - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found
+         * - `skip_solids.enabled`: (Boolean) - [false] True if you want to skip past frames that are mostly solid.
+         * - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found.
+         * - `skip_solids.max_ratio`: (Float) - [0.95] If the frame contains more solid pixels, it will be skipped.
          */
         FrameGrab = function(user_passed_opts) {
             var options = this._normalize_options(user_passed_opts);
@@ -157,6 +158,7 @@
                 frame_rate = spec.frame_rate,
                 frames_to_skip = spec.skip_solids.frames.toString(),
                 max_size = spec.max_size,
+                max_solid_ratio = spec.skip_solids.max_ratio,
                 skip_solids = spec.skip_solids.enabled,
                 time_in_secs = spec.time_in_secs,
                 video = spec.video;
@@ -166,7 +168,7 @@
                 function() {
                     this._draw(video, canvas, max_size);
 
-                    if (skip_solids && this._is_solid_color(canvas)) {
+                    if (skip_solids && this._is_solid_color(canvas, max_solid_ratio)) {
                         (function() {
                             var jump_frames_in_secs =
                                 this._normalize_time(frames_to_skip, frame_rate);
@@ -196,13 +198,12 @@
                 el.tagName.toLowerCase() === type;
         },
 
-        // TODO Do a better job of detecting solid colors.
         // That is, detect ALL solid colors and colors that are near-solid.
-        _is_solid_color: function(canvas) {
+        _is_solid_color: function(canvas, max_solid_ratio) {
             var context = canvas.getContext("2d"),
                 image_data = context.getImageData(0, 0, canvas.width, canvas.height),
                 pixel_data = image_data.data,
-                black_occurrences = 0,
+                solid_occurrences = 0,
                 pixel_index, red, green, blue, alpha;
 
             for (var i = 0; i < pixel_data.length; i++) {
@@ -214,18 +215,16 @@
                 alpha = pixel_data[pixel_index];
 
                 // We only currently look for solid or near-solid black
-                // TODO consider making these values configurable
                 if (alpha === 255 &&
                     Math.abs(red - green) < 30 &&
                     Math.abs(green - blue) < 30) {
 
-                    black_occurrences++;
+                    solid_occurrences++;
                 }
             }
 
             // If at least 95% of the frame is solid black, return true
-            // TODO consider making the quotient configurable
-            if (black_occurrences / (pixel_data.length / 4) > 0.95) {
+            if (solid_occurrences / (pixel_data.length / 4) > max_solid_ratio) {
                 return true;
             }
             return false;
@@ -237,7 +236,8 @@
                 frame_rate: user_passed_options.frame_rate,
                 skip_solids: {
                     enabled: false,
-                    frames: 5
+                    frames: 5,
+                    max_ratio: 0.95
                 }
             };
 
@@ -246,6 +246,9 @@
 
                 options.skip_solids.frames = user_passed_options.skip_solids.frames ||
                     options.skip_solids.frames;
+
+                options.skip_solids.max_ratio = user_passed_options.skip_solids.max_ratio ||
+                    options.skip_solids.max_ratio;
             }
 
             return options;

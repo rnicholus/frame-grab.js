@@ -228,11 +228,8 @@ describe("live video tests", function() {
             spyOn(fg, "_normalize_time").and.callThrough();
 
             fg.grab(document.createElement("canvas"), "0:30").then(function() {
-                expect(fg._normalize_time.calls.count()).toEqual(5);
+                expect(fg._normalize_time.calls.count()).toBeGreaterThan(1);
                 expect(fg._normalize_time.calls.argsFor(1)).toEqual(["5", 30]);
-                expect(fg._normalize_time.calls.argsFor(2)).toEqual(["5", 30]);
-                expect(fg._normalize_time.calls.argsFor(3)).toEqual(["5", 30]);
-                expect(fg._normalize_time.calls.argsFor(4)).toEqual(["5", 30]);
                 done();
             });
         });
@@ -250,14 +247,8 @@ describe("live video tests", function() {
             spyOn(fg, "_normalize_time").and.callThrough();
 
             fg.grab(document.createElement("canvas"), "0:30").then(function() {
-                expect(fg._normalize_time.calls.count()).toEqual(8);
+                expect(fg._normalize_time.calls.count()).toBeGreaterThan(1);
                 expect(fg._normalize_time.calls.argsFor(1)).toEqual(["3", 30]);
-                expect(fg._normalize_time.calls.argsFor(2)).toEqual(["3", 30]);
-                expect(fg._normalize_time.calls.argsFor(3)).toEqual(["3", 30]);
-                expect(fg._normalize_time.calls.argsFor(4)).toEqual(["3", 30]);
-                expect(fg._normalize_time.calls.argsFor(5)).toEqual(["3", 30]);
-                expect(fg._normalize_time.calls.argsFor(6)).toEqual(["3", 30]);
-                expect(fg._normalize_time.calls.argsFor(7)).toEqual(["3", 30]);
                 done();
             });
         });
@@ -286,6 +277,49 @@ describe("live video tests", function() {
                     expect(fg._is_solid_color).toHaveBeenCalled();
                     done();
                 });
+        });
+    });
+
+    describe("solid frame test options enforcement", function() {
+        beforeEach(function() {
+            setupVideo.call(this, "big_buck_bunny");
+        });
+
+        afterEach(cleanupVideo);
+
+        it("uses a default value for max_ratio if no value is supplied by user", function(done) {
+            var fg = new FrameGrab({
+                video: this.video_el,
+                frame_rate: 30,
+                skip_solids: {
+                    enabled: true
+                }
+            });
+
+            spyOn(fg, "_is_solid_color");
+
+            fg.grab(document.createElement("canvas"), "0:30").then(function() {
+                expect(fg._is_solid_color.calls.argsFor(0)[1]).toBeTruthy();
+                done();
+            });
+        });
+
+        it("uses a user passed value for max_ratio", function(done) {
+            var fg = new FrameGrab({
+                video: this.video_el,
+                frame_rate: 30,
+                skip_solids: {
+                    enabled: true,
+                    max_ratio: 0.812
+                }
+            });
+
+            spyOn(fg, "_is_solid_color");
+
+            fg.grab(document.createElement("canvas"), "0:30").then(function() {
+                expect(fg._is_solid_color.calls.argsFor(0)[1]).toEqual(0.812);
+                done();
+            });
         });
     });
 });
