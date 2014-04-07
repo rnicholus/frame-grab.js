@@ -83,6 +83,19 @@
 
                 return grab_deferred.promise;
             };
+
+            this.grab_now = function(target_container, opt_max_size) {
+                var deferred = new RSVP.defer();
+
+                clone_ready.then(function() {
+                    this.grab(target_container, video_clone.currentTime, opt_max_size).then(
+                        deferred.resolve,
+                        deferred.reject
+                    );
+                }.bind(this));
+
+                return deferred.promise;
+            };
         };
 
     FrameGrab.prototype = {

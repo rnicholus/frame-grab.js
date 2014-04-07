@@ -131,7 +131,9 @@ describe("live video tests", function() {
 
     function cleanupVideo() {
         this.video_el.src = "";
+
         this.video_el.parentNode.removeChild(this.video_el);
+
     }
 
 
@@ -148,7 +150,6 @@ describe("live video tests", function() {
             setupVideo.call(this, "big_buck_bunny");
             this.video_el.addEventListener("canplay", done_callback);
         });
-
         afterEach(cleanupVideo);
 
         it("seeks to a valid time", function(done) {
@@ -200,7 +201,6 @@ describe("live video tests", function() {
         beforeEach(function() {
             setupVideo.call(this, "big_buck_bunny");
         });
-
         afterEach(cleanupVideo);
 
         it("does not attempt to skip past solid frames if not enabled via options", function(done) {
@@ -258,7 +258,6 @@ describe("live video tests", function() {
         beforeEach(function() {
             setupVideo.call(this, "black_screen_test");
         });
-
         afterEach(cleanupVideo);
 
         it("fails if the video ends before a non-solid frame is encountered", function (done) {
@@ -284,7 +283,6 @@ describe("live video tests", function() {
         beforeEach(function() {
             setupVideo.call(this, "big_buck_bunny");
         });
-
         afterEach(cleanupVideo);
 
         it("uses a default value for max_ratio if no value is supplied by user", function(done) {
@@ -320,6 +318,30 @@ describe("live video tests", function() {
                 expect(fg._is_solid_color.calls.argsFor(0)[1]).toEqual(0.812);
                 done();
             });
+        });
+    });
+
+    describe("grab_now tests", function() {
+        beforeEach(function() {
+            setupVideo.call(this, "black_screen_test");
+        });
+        afterEach(cleanupVideo);
+
+        it("attempts to grab the current frame in a video", function(done) {
+            var canvas = document.createElement("canvas"),
+                deferred = new RSVP.defer(),
+                fg = new FrameGrab({
+                video: this.video_el,
+                frame_rate: 30
+            });
+
+            deferred.resolve();
+            spyOn(fg, "grab").and.returnValue(deferred.promise);
+
+            fg.grab_now(canvas, 100).then(function() {
+                expect(fg.grab).toHaveBeenCalledWith(canvas, this.video_el.currentTime, 100);
+                done();
+            }.bind(this));
         });
     });
 });
