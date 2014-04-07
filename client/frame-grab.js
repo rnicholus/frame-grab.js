@@ -88,7 +88,7 @@
                 var deferred = new RSVP.defer();
 
                 clone_ready.then(function() {
-                    this.grab(target_container, video_clone.currentTime, opt_max_size).then(
+                    this.grab(target_container, options.video.currentTime, opt_max_size).then(
                         deferred.resolve,
                         deferred.reject
                     );

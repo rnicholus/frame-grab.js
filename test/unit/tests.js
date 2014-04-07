@@ -338,10 +338,15 @@ describe("live video tests", function() {
             deferred.resolve();
             spyOn(fg, "grab").and.returnValue(deferred.promise);
 
-            fg.grab_now(canvas, 100).then(function() {
-                expect(fg.grab).toHaveBeenCalledWith(canvas, this.video_el.currentTime, 100);
-                done();
-            }.bind(this));
+            var done_callback = function() {
+                this.video_el.currentTime = 0.1;
+                this.video_el.removeEventListener("canplay", done_callback);
+                fg.grab_now(canvas, 100).then(function() {
+                    expect(fg.grab).toHaveBeenCalledWith(canvas, 0.1, 100);
+                    done();
+                }.bind(this));
+            }.bind(this);
+            this.video_el.addEventListener("canplay", done_callback);
         });
     });
 });
