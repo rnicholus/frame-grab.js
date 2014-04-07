@@ -168,7 +168,7 @@
                 function() {
                     this._draw(video, canvas, max_size);
 
-                    if (skip_solids && this._is_solid_color(canvas, max_solid_ratio)) {
+                    if (skip_solids && this._is_solid_color(video, max_solid_ratio)) {
                         (function() {
                             var jump_frames_in_secs =
                                 this._normalize_time(frames_to_skip, frame_rate);
@@ -199,8 +199,9 @@
         },
 
         // That is, detect ALL solid colors and colors that are near-solid.
-        _is_solid_color: function(canvas, max_solid_ratio) {
-            var context = canvas.getContext("2d"),
+        _is_solid_color: function(video, max_solid_ratio) {
+            var canvas = this._draw(video, document.createElement("canvas"), 10),
+                context = canvas.getContext("2d"),
                 image_data = context.getImageData(0, 0, canvas.width, canvas.height),
                 pixel_data = image_data.data,
                 solid_occurrences = 0,
