@@ -16,7 +16,7 @@ for a simple example.  Please note that, while frame-grab is functional, it is n
 yet complete.  See the [issue tracker][issues] for information and progress
 on upcoming features.
 
-###API
+### API
 To construct an instance, you must pass an `Object` with some configuration options.
 At a minimum, you must incude a reference to your source `<video>` and the video's
 frame-rate, like this:
@@ -81,3 +81,15 @@ for your video, simply by seeking to that frame in the player and calling this m
 [rsvp]: https://github.com/tildeio/rsvp.js/tree/master
 [testindex]: https://github.com/rnicholus/frame-grab.js/blob/master/test/index.html
 [timecode]: https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=5%26tasks=true
+
+
+
+#### FrameGrab.make_story
+Frame Grab will create a storyboard for you!  Just point it at a video and let it know
+how many images you require.  The result will be proportionally spaced frame grabs of
+your video, representing a visual outline of your video.
+
+`make_story` takes three parameters:
+- `type`: (String) - [REQUIRED] Type of image containers to create ("canvas" or "img").
+- `images` (Integer) - [REQUIRED] Total number of images to generate.
+- `size` (Integer) - The size of the rendered images.  If omitted, the size of the video will be used.

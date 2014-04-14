@@ -24,7 +24,7 @@
             var video_clone = this._clone_video(options.video),
                 clone_ready = new Promise(function(resolve) {
                     video_clone.addEventListener("canplaythrough", function() {
-                        resolve();
+                        resolve(video_clone);
                     });
                 });
 
@@ -38,7 +38,7 @@
                 var grab_deferred = new RSVP.defer(),
                     time_in_secs = this._normalize_time(time, options.frame_rate);
 
-                clone_ready.then(function() {
+                clone_ready.then(function(cloned_video) {
                     var temp_canvas = document.createElement("canvas");
 
                     this._draw_specific_frame({
@@ -47,7 +47,7 @@
                         max_size: opt_max_size,
                         skip_solids: options.skip_solids,
                         time_in_secs: time_in_secs,
-                        video: video_clone
+                        video: cloned_video
                     }).then(
                         // draw success
                         function() {
@@ -93,6 +93,31 @@
                         deferred.reject
                     );
                 }.bind(this));
+
+                return deferred.promise;
+            };
+
+            this.make_story = function(type, images, opt_size) {
+                var deferred = new RSVP.defer(),
+                    normalized_type = type && type.toLowerCase(),
+                    size = typeof opt_size === "number" && opt_size > 0 && opt_size;
+
+                if (!normalized_type ||
+                    normalized_type !== "canvas" &&
+                    normalized_type !== "img") {
+
+                    throw new Error(type + " is not a valid type!");
+                }
+                else if (!images ||
+                    typeof images !== "number" ||
+                    images < 0) {
+
+                    throw new Error(images + " is not a valid number of images!");
+                }
+
+                clone_ready.then(function(cloned_video) {
+                    var frame_period = cloned_video.duration / images;
+                });
 
                 return deferred.promise;
             };

@@ -349,4 +349,59 @@ describe("live video tests", function() {
             this.video_el.addEventListener("canplay", done_callback);
         });
     });
+
+    describe("make_story", function() {
+        describe("parameter error handling", function() {
+            beforeEach(function() {
+                this.fg = new FrameGrab({
+                    video: document.createElement("video"),
+                    frame_rate: 1
+                });
+            });
+
+            it("rejects invalid type param", function() {
+                expect(function() {
+                    this.fg.make_story(null, 1);
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story("foobar", 1);
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story(1, 1);
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story("CANVAS", 1);
+                }.bind(this)).not.toThrow();
+
+                expect(function() {
+                    this.fg.make_story("canvas", 1);
+                }.bind(this)).not.toThrow();
+
+                expect(function() {
+                    this.fg.make_story("iMg", 1);
+                }.bind(this)).not.toThrow();
+
+                expect(function() {
+                    this.fg.make_story("img", 1);
+                }.bind(this)).not.toThrow();
+            });
+
+            it("rejects invalid images param", function() {
+                expect(function() {
+                    this.fg.make_story("canvas");
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story("canvas", -1);
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story("canvas", 0);
+                }.bind(this)).toThrow();
+            });
+        });
+    });
 });
