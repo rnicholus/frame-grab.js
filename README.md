@@ -1,7 +1,7 @@
 frame-grab.js
 =============
 
-##Grab, manipulate, and render &lt;video> frames
+## Grab, manipulate, and render &lt;video> frames
 
 [![Build Status](https://travis-ci.org/rnicholus/frame-grab.js.svg?branch=master)](https://travis-ci.org/rnicholus/frame-grab.js)
 [![Semver](http://img.shields.io/SemVer/2.0.0.png)](http://semver.org/spec/v2.0.0.html)
@@ -9,7 +9,7 @@ frame-grab.js
 <img src="http://benschwarz.github.io/bower-badges/badge@2x.png" width="130" height="30">
 
 
-###Getting started
+### Getting started
 Simply include both frame-grab.js, the [RSVP promise library][rsvp], and a source video
 on your page.  See the [index.html file in the test directory][testindex]
 for a simple example.  Please note that, while frame-grab is functional, it is not
