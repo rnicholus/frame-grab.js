@@ -91,5 +91,5 @@ your video, representing a visual outline of your video.
 
 `make_story` takes three parameters:
 - `type`: (String) - [REQUIRED] Type of image containers to create ("canvas" or "img").
-- `images` (Integer) - [REQUIRED] Total number of images to generate.
-- `size` (Integer) - The size of the rendered images.  If omitted, the size of the video will be used.
+- `images`: (Integer) - [REQUIRED] Total number of images to generate.
+- `size`: (Integer) - The size of the rendered images.  If omitted, the size of the video will be used.
