@@ -49,8 +49,7 @@
                         time_in_secs: time_in_secs,
                         video: cloned_video
                     }).then(
-                        // draw success
-                        function() {
+                        function draw_success() {
                             // If a canvas is user-supplied, draw onto a temp canvas
                             // and then draw the final image onto the passed canvas
                             // to avoid flickering in case we need to adjust the time
@@ -213,25 +212,19 @@
         },
 
         _draw_specific_frame: function(spec) {
-            var canvas = spec.canvas,
-                deferred = spec.deferred || RSVP.defer(),
-                frame_rate = spec.frame_rate,
-                frames_to_skip = spec.skip_solids.frames.toString(),
-                max_size = spec.max_size,
-                max_solid_ratio = spec.skip_solids.max_ratio,
-                skip_solids = spec.skip_solids.enabled,
-                time_in_secs = spec.time_in_secs,
-                video = spec.video;
+            var deferred = spec.deferred || RSVP.defer(),
+                frames_to_skip = spec.skip_solids.frames.toString();
 
-            this._seek(video, time_in_secs).then(
-                // seek success
-                function() {
-                    this._draw(video, canvas, max_size);
+            this._seek(spec.video, spec.time_in_secs).then(
+                function seek_success() {
+                    this._draw(spec.video, spec.canvas, spec.max_size);
 
-                    if (skip_solids && this._is_solid_color(video, max_solid_ratio)) {
+                    if (spec.skip_solids.enabled &&
+                        this._is_solid_color(spec.video, spec.skip_solids.max_ratio)) {
+
                         (function() {
                             var jump_frames_in_secs =
-                                this._normalize_time(frames_to_skip, frame_rate);
+                                this._normalize_time(frames_to_skip, spec.frame_rate);
 
                             spec.time_in_secs += jump_frames_in_secs;
                             spec.deferred = deferred;
@@ -240,10 +233,11 @@
                         }.bind(this)());
                     }
                     else {
-                        deferred.resolve(canvas);
+                        deferred.resolve(spec.canvas);
                     }
                 }.bind(this),
-                function() {
+
+                function seek_failure() {
                     console.error("Failed to seek in _draw_specific_frame!");
                     deferred.reject("Seek failure!");
                 }
