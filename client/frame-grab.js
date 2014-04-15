@@ -116,8 +116,30 @@
                 }
 
                 clone_ready.then(function(cloned_video) {
-                    var frame_period = cloned_video.duration / images;
-                });
+                    var frame_period = cloned_video.duration / images,
+                        rendered_frames = [];
+
+                    function drawNextFrame(time_to_render) {
+                        var container = document.createElement(normalized_type);
+
+                        this.grab(container, time_to_render, size).then(
+                            function grabbed(rendered_container) {
+                                rendered_frames.push(rendered_container);
+
+                                if (rendered_frames.length < images) {
+                                    drawNextFrame.call(this, time_to_render + frame_period);
+                                }
+                                else {
+                                    deferred.resolve(rendered_frames);
+                                }
+                            }.bind(this),
+
+                            deferred.reject
+                        );
+                    }
+
+                    drawNextFrame.call(this, 0);
+                }.bind(this));
 
                 return deferred.promise;
             };

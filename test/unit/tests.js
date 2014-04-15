@@ -403,5 +403,66 @@ describe("live video tests", function() {
                 }.bind(this)).toThrow();
             });
         });
+
+        describe("live video tests", function() {
+            var expected_video_height = 360,
+                expected_video_width = 640;
+
+            beforeEach(function() {
+                setupVideo.call(this, "big_buck_bunny");
+            });
+            afterEach(cleanupVideo);
+
+            it("generates expected number of canvas elements", function(done) {
+                var fg = new FrameGrab({
+                    video: this.video_el,
+                    frame_rate: 30
+                });
+
+                fg.make_story("canvas", 5).then(
+                    function success(canvases) {
+                        expect(canvases.length).toBe(5);
+                        for (var i = 0; i < canvases.length; i++) {
+                            expect(canvases[i].tagName.toLowerCase()).toEqual("canvas");
+                            expect(canvases[i].width).toEqual(expected_video_width);
+                            expect(canvases[i].height).toEqual(expected_video_height);
+                        }
+                        done();
+                    },
+
+                    function failure() {
+                        console.error("make_story failed!");
+                    }
+                );
+            });
+
+            it("generates expected number of img elements", function(done) {
+                var fg = new FrameGrab({
+                    video: this.video_el,
+                    frame_rate: 30
+                });
+
+                fg.make_story("img", 5).then(
+                    function success(imgs) {
+                        var last_data_uri;
+
+                        expect(imgs.length).toBe(5);
+                        for (var i = 0; i < imgs.length; i++) {
+                            expect(imgs[i].tagName.toLowerCase()).toEqual("img");
+                            expect(imgs[i].src).not.toEqual(last_data_uri);
+                            expect(imgs[i].width).toEqual(expected_video_width);
+                            expect(imgs[i].height).toEqual(expected_video_height);
+
+                            last_data_uri = imgs[i].src;
+                        }
+                        done();
+                    },
+
+                    function failure() {
+                        console.error("make_story failed!");
+                    }
+                );
+            });
+        });
     });
 });
