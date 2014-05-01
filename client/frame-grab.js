@@ -388,8 +388,13 @@
         _uncacheable_url: function(url) {
             var param_prefix = url.indexOf("?") > 0 ? "&" : "?";
 
-            return url + param_prefix +
-                "fgtimestamp=" + new Date().getMilliseconds();
+            // Don't attempt to add cache-buster to data URI, as this apparently results in a 404.
+            if (url.indexOf("blob:") !== 0) {
+                return url + param_prefix +
+                    "fgtimestamp=" + new Date().getMilliseconds();
+            }
+
+            return url;
         },
 
         // TODO cleanup this mess from FedEx Day
