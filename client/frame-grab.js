@@ -110,7 +110,8 @@
 
                 if (!normalized_type ||
                     normalized_type !== "canvas" &&
-                    normalized_type !== "img") {
+                    normalized_type !== "img" &&
+                    normalized_type !== "blob") {
 
                     throw new Error(type + " is not a valid type!");
                 }
@@ -122,11 +123,11 @@
                 }
 
                 clone_ready.then(function(cloned_video) {
-                    var frame_period = cloned_video.duration / images,
+                    var frame_period = cloned_video.duration / (images + 1),
                         rendered_frames = [],
 
                         draw_next_frame = function(time_to_render) {
-                            var container = document.createElement(normalized_type);
+                            var container = normalized_type === "blob" ? "blob" : document.createElement(normalized_type);
 
                             this.grab(container, time_to_render, size).then(
                                 function grabbed(rendered_container) {
@@ -144,7 +145,7 @@
                             );
                         }.bind(this);
 
-                    draw_next_frame(0);
+                    draw_next_frame(frame_period);
                 }.bind(this));
 
                 return deferred.promise;
