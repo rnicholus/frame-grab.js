@@ -440,5 +440,25 @@
         }
     };
 
+    FrameGrab.make_video = function(blob, video) {
+        var URL = window.URL || window.webkitURL,
+            video_url = URL.createObjectURL(blob),
+            temp_video = document.createElement("video"),
+            deferred = new RSVP.defer();
+
+        temp_video.addEventListener("canplay", function() {
+            video.setAttribute("src", video_url);
+            deferred.resolve(video);
+        });
+
+        temp_video.onerror = function() {
+            deferred.reject();
+        };
+
+        temp_video.setAttribute("src", video_url);
+
+        return deferred.promise;
+    };
+
     this.FrameGrab = FrameGrab;
 }());
