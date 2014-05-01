@@ -460,5 +460,31 @@
         return deferred.promise;
     };
 
+    FrameGrab.secs_to_timecode = function(secs, framerate) {
+        var pad_tc = function(segment) {
+                return ("00" + segment).substr(-2, 2);
+            },
+            timecode, tc_mins, tc_secs, tc_frames,
+            tc_hours = Math.floor(secs / 60 / 60);
+
+        timecode = pad_tc(tc_hours) + ":";
+        secs -= tc_hours * 60 * 60;
+
+        tc_mins = Math.floor(secs / 60);
+        timecode += pad_tc(tc_mins) + ":";
+        secs -= tc_mins * 60;
+
+        tc_secs = Math.floor(secs);
+        timecode += pad_tc(tc_secs) + ":";
+        secs -= tc_secs;
+
+        tc_frames = Math.floor(secs * framerate);
+        timecode += pad_tc(tc_frames);
+
+        return timecode;
+    };
+
+    FrameGrab.timecode_to_secs = FrameGrab.prototype.timecode_to_secs;
+
     this.FrameGrab = FrameGrab;
 }());
