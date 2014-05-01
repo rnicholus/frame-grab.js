@@ -42,7 +42,10 @@
     "supernew": false,
     "predef": [
         "afterEach",
+        "ArrayBuffer",
+        "atob",
         "beforeEach",
+        "Blob",
         "console",
         "describe",
         "document",
@@ -51,6 +54,7 @@
         "it",
         "RSVP",
         "spyOn",
+        "Uint8Array",
         "window"
     ]
 }

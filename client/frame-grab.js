@@ -30,9 +30,10 @@
 
             this.grab = function(target_container, time, opt_max_size) {
                 if (!this._is_element(target_container, "img") &&
-                    !this._is_element(target_container, "canvas")) {
+                    !this._is_element(target_container, "canvas") &&
+                    !target_container && target_container.toLowerCase() !== "blob") {
 
-                    throw new Error("Target container must be an <img> or <canvas>!");
+                    throw new Error("Target container must be an <img>, <canvas>, or 'blob'!");
                 }
 
                 var grab_deferred = new RSVP.defer(),
@@ -64,7 +65,8 @@
 
                                 grab_deferred.resolve(target_container);
                             }
-                            else {
+
+                            else if (this._is_element("img")) {
                                 target_container.onload = function() {
                                     grab_deferred.resolve(target_container);
                                 };
@@ -72,6 +74,11 @@
                                     grab_deferred.reject("Frame failed to load in <img>.");
                                 };
                                 target_container.src = temp_canvas.toDataURL();
+                            }
+
+                            // target container is a Blob
+                            else {
+                                grab_deferred.resolve(this._dataUriToBlob(temp_canvas.toDataURL()));
                             }
                         }.bind(this),
 
@@ -383,6 +390,53 @@
 
             return url + param_prefix +
                 "fgtimestamp=" + new Date().getMilliseconds();
+        },
+
+        // TODO cleanup this mess from FedEx Day
+        _dataUriToBlob: function(dataUri) {
+            "use strict";
+
+            var byteString, mimeString, arrayBuffer, intArray;
+
+            // convert base64 to raw binary data held in a string
+            if (dataUri.split(",")[0].indexOf("base64") >= 0) {
+                byteString = atob(dataUri.split(",")[1]);
+            }
+            else {
+                byteString = decodeURI(dataUri.split(",")[1]);
+            }
+
+            // extract the MIME
+            mimeString = dataUri.split(",")[0]
+                .split(":")[1]
+                .split(";")[0];
+
+            // write the bytes of the binary string to an ArrayBuffer
+            arrayBuffer = new ArrayBuffer(byteString.length);
+            intArray = new Uint8Array(arrayBuffer);
+            for (var i = 0; i < byteString.length; i++) {
+                intArray[i] = byteString.charCodeAt(i);
+            }
+
+            return this._createBlob(arrayBuffer, mimeString);
+        },
+
+        _createBlob: function(data, mime) {
+            "use strict";
+
+            var BlobBuilder = window.BlobBuilder ||
+                    window.WebKitBlobBuilder ||
+                    window.MozBlobBuilder ||
+                    window.MSBlobBuilder,
+                blobBuilder = BlobBuilder && new BlobBuilder();
+
+            if (blobBuilder) {
+                blobBuilder.append(data);
+                return blobBuilder.getBlob(mime);
+            }
+            else {
+                return new Blob([data], {type: mime});
+            }
         }
     };
 
