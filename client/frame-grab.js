@@ -50,7 +50,7 @@
                         time_in_secs: time_in_secs,
                         video: cloned_video
                     }).then(
-                        function draw_success() {
+                        function draw_success(result) {
                             // If a canvas is user-supplied, draw onto a temp canvas
                             // and then draw the final image onto the passed canvas
                             // to avoid flickering in case we need to adjust the time
@@ -63,12 +63,12 @@
 
                                 target_context.drawImage(temp_canvas, 0, 0);
 
-                                grab_deferred.resolve(target_container);
+                                grab_deferred.resolve({time: result.time, container: target_container});
                             }
 
                             else if (this._is_element("img")) {
                                 target_container.onload = function() {
-                                    grab_deferred.resolve(target_container);
+                                    grab_deferred.resolve({time: result.time, container: target_container});
                                 };
                                 target_container.onerror = function() {
                                     grab_deferred.reject("Frame failed to load in <img>.");
@@ -78,7 +78,7 @@
 
                             // target container is a Blob
                             else {
-                                grab_deferred.resolve(this._dataUriToBlob(temp_canvas.toDataURL()));
+                                grab_deferred.resolve({time: result.time, container: this._dataUriToBlob(temp_canvas.toDataURL())});
                             }
                         }.bind(this),
 
@@ -241,7 +241,7 @@
                         }.bind(this)());
                     }
                     else {
-                        deferred.resolve(spec.canvas);
+                        deferred.resolve({time: spec.time_in_secs, container: spec.canvas});
                     }
                 }.bind(this),
 
