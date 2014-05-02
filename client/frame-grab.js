@@ -2,13 +2,15 @@
 
     var Promise = RSVP.Promise,
 
+        // TODO document that frame_rate is now optional (unless timecode args are used)
         /**
          * Supported options object properties:
          *
          * - `video`: (HTMLVideoElement) - [REQUIRED] The source video
-         * - `frame_rate`: (Float) - [REQUIRED] The frame rate of the video
+         * - `frame_rate`: (Float) - [null/undefined] The frame rate of the video.  Must be specified only if you intend to address the API using SMPTE timecode parameters or use methods dependent on frame calculation.
          * - `skip_solids.enabled`: (Boolean) - [false] True if you want to skip past frames that are mostly solid.
-         * - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found.
+         * - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found.  Used if a frame_rate is specified during constructions.
+         * - `skip_solids.secs`: (Float) - [0.25] Number of seconds to skip ahead when a solid frame is found.  Used if no frame_rate is specified during construction.
          * - `skip_solids.max_ratio`: (Float) - [0.95] If the frame contains more solid pixels, it will be skipped.
          */
         FrameGrab = function(user_passed_opts) {
@@ -17,7 +19,7 @@
             if (!this._is_element(options.video, "video")) {
                 throw new Error("You must pass a valid <video>!");
             }
-            if (!options.frame_rate || options.frame_rate < 0) {
+            if (options.frame_rate != null && options.frame_rate <= 0) {
                 throw new Error("Invalid frame rate of " + options.frame_rate);
             }
 
@@ -221,7 +223,15 @@
 
         _draw_specific_frame: function(spec) {
             var deferred = spec.deferred || RSVP.defer(),
+                frames_to_skip, secs_to_skip;
+
+            if (spec.frame_rate) {
                 frames_to_skip = spec.skip_solids.frames.toString();
+                secs_to_skip = this._normalize_time(frames_to_skip, spec.frame_rate);
+            }
+            else {
+                secs_to_skip = spec.skip_solids.secs;
+            }
 
             this._seek(spec.video, spec.time_in_secs).then(
                 function seek_success() {
@@ -231,12 +241,16 @@
                         this._is_solid_color(spec.video, spec.skip_solids.max_ratio)) {
 
                         (function() {
-                            var jump_frames_in_secs =
-                                this._normalize_time(frames_to_skip, spec.frame_rate);
-
-                            spec.time_in_secs += jump_frames_in_secs;
+                            spec.time_in_secs += secs_to_skip;
                             spec.deferred = deferred;
-                            console.log("Found a solid frame, advancing 5 frames to find a non-solid one");
+
+                            if (spec.frame_rate) {
+                                console.log("Found a solid frame, advancing " + frames_to_skip + " frames to find a non-solid one");
+                            }
+                            else {
+                                console.log("Found a solid frame, advancing " + secs_to_skip + " seconds to find a non-solid one");
+                            }
+
                             this._draw_specific_frame(spec);
                         }.bind(this)());
                     }
@@ -299,6 +313,7 @@
                 skip_solids: {
                     enabled: false,
                     frames: 5,
+                    secs: 0.25,
                     max_ratio: 0.95
                 }
             };
@@ -308,6 +323,9 @@
 
                 options.skip_solids.frames = user_passed_options.skip_solids.frames ||
                     options.skip_solids.frames;
+
+                options.skip_solids.secs = user_passed_options.skip_solids.secs ||
+                    options.skip_solids.secs;
 
                 options.skip_solids.max_ratio = user_passed_options.skip_solids.max_ratio ||
                     options.skip_solids.max_ratio;
@@ -466,6 +484,7 @@
         return deferred.promise;
     };
 
+    // TODO eliminate redundancies
     FrameGrab.secs_to_timecode = function(secs, framerate) {
         var pad_tc = function(segment) {
                 return ("00" + segment).substr(-2, 2);
@@ -488,6 +507,33 @@
         timecode += pad_tc(tc_frames);
 
         return timecode;
+    };
+
+    // TODO eliminate redundancies
+    FrameGrab.secs_to_formatted_time_string = function(secs, precision) {
+        var pad_tc = function(segment) {
+                return ("00" + segment).substr(-2, 2);
+            },
+            formatted_time_string, tc_mins, tc_secs, tc_secs_remainder,
+            tc_hours = Math.floor(secs / 60 / 60);
+
+        formatted_time_string = pad_tc(tc_hours) + ":";
+        secs -= tc_hours * 60 * 60;
+
+        tc_mins = Math.floor(secs / 60);
+        formatted_time_string += pad_tc(tc_mins) + ":";
+        secs -= tc_mins * 60;
+
+        tc_secs = Math.floor(secs);
+        formatted_time_string += pad_tc(tc_secs);
+        secs -= tc_secs;
+
+        if (secs > 0) {
+            tc_secs_remainder = secs.toFixed(precision);
+            formatted_time_string += String(tc_secs_remainder).replace("0.", ".");
+        }
+
+        return formatted_time_string;
     };
 
     FrameGrab.timecode_to_secs = FrameGrab.prototype.timecode_to_secs;
