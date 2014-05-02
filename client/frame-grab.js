@@ -275,7 +275,7 @@
         },
 
         // That is, detect ALL solid colors and colors that are near-solid.
-        // TODO Off-black frames (frames that appear black but are made up of varying shades of black) are not properly detected though.  Will need to adjust this algorithm to detect a frame made up of similar colors as "solid".
+        // TODO This code became very messy during FedEx Day.  Soem time will need to be spent cleaning this up.
         _is_solid_color: function(video, max_solid_ratio) {
                 // re-draw the frame onto the canvas at a minimal size
                 // to speed up image data parsing
@@ -284,7 +284,7 @@
                 image_data = context.getImageData(0, 0, canvas.width, canvas.height),
                 pixel_data = image_data.data,
                 solid_occurrences = 0,
-                color_count = {},
+                color_count = {length: 0},
                 red, green, blue, alpha;
 
             for (var pixel_index = 0; pixel_index < pixel_data.length;) {
@@ -299,17 +299,44 @@
                     }
                     else {
                         color_count[red] = 1;
+                        color_count.length++;
                     }
                 }
             }
 
+            function get_like_solid_occurrences(occurrences_by_color, color_index) {
+                var range = 5,
+                    current_idx = color_index,
+                    occurrences = occurrences_by_color[color_index];
+
+                for (var i = 1; i <= 5 && current_idx < occurrences_by_color.length; i++) {
+                    current_idx++;
+                    if (occurrences_by_color[current_idx]) {
+                        occurrences += occurrences_by_color[current_idx];
+                    }
+                }
+
+                current_idx = color_index;
+                for (var i = 1; i > 0 && current_idx >= 0; i++) {
+                    current_idx--;
+                    if (occurrences_by_color[current_idx]) {
+                        occurrences += occurrences_by_color[current_idx];
+                    }
+                }
+
+                return occurrences;
+            }
+
+            var occurrences = 0;
             for (var color_val in color_count) {
-                solid_occurrences = Math.max(solid_occurrences, color_count[color_val]);
+                if (color_val !== "length") {
+                    occurrences = get_like_solid_occurrences(color_count, parseInt(color_val));
+                    solid_occurrences = Math.max(solid_occurrences, occurrences);
+                }
             }
 
             // If most of the frames are solid, return true
-            console.log(solid_occurrences / (pixel_data.length / 4));
-            return (solid_occurrences / (pixel_data.length / 4) >= .98);
+            return (solid_occurrences / (pixel_data.length / 4) > max_solid_ratio);
         },
 
         _normalize_options: function(user_passed_options) {
@@ -320,7 +347,7 @@
                     enabled: false,
                     frames: 5,
                     secs: 0.25,
-                    max_ratio: 0.98
+                    max_ratio: 0.92
                 }
             };
 
