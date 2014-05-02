@@ -11,7 +11,7 @@
          * - `skip_solids.enabled`: (Boolean) - [false] True if you want to skip past frames that are mostly solid.
          * - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found.  Used if a frame_rate is specified during constructions.
          * - `skip_solids.secs`: (Float) - [0.25] Number of seconds to skip ahead when a solid frame is found.  Used if no frame_rate is specified during construction.
-         * - `skip_solids.max_ratio`: (Float) - [0.95] If the frame contains more solid pixels, it will be skipped.
+         * - `skip_solids.max_ratio`: (Float) - [0.98] If the frame contains more solid pixels, it will be skipped.
          */
         FrameGrab = function(user_passed_opts) {
             var options = this._normalize_options(user_passed_opts);
@@ -275,6 +275,7 @@
         },
 
         // That is, detect ALL solid colors and colors that are near-solid.
+        // TODO Off-black frames (frames that appear black but are made up of varying shades of black) are not properly detected though.  Will need to adjust this algorithm to detect a frame made up of similar colors as "solid".
         _is_solid_color: function(video, max_solid_ratio) {
                 // re-draw the frame onto the canvas at a minimal size
                 // to speed up image data parsing
@@ -283,27 +284,32 @@
                 image_data = context.getImageData(0, 0, canvas.width, canvas.height),
                 pixel_data = image_data.data,
                 solid_occurrences = 0,
-                pixel_index, red, green, blue, alpha;
+                color_count = {},
+                red, green, blue, alpha;
 
-            for (var i = 0; i < pixel_data.length; i++) {
-                pixel_index = 4 * i;
-
+            for (var pixel_index = 0; pixel_index < pixel_data.length;) {
                 red = pixel_data[pixel_index++];
                 green = pixel_data[pixel_index++];
                 blue = pixel_data[pixel_index++];
-                alpha = pixel_data[pixel_index];
+                alpha = pixel_data[pixel_index++];
 
-                // We only currently look for solid or near-solid black
-                if (alpha === 255 &&
-                    Math.abs(red - green) < 30 &&
-                    Math.abs(green - blue) < 30) {
-
-                    solid_occurrences++;
+                if (red === green && green === blue) {
+                    if (color_count[red]) {
+                        color_count[red] += 1;
+                    }
+                    else {
+                        color_count[red] = 1;
+                    }
                 }
             }
 
-            // If at least 95% of the frame is solid black, return true
-            return (solid_occurrences / (pixel_data.length / 4) > max_solid_ratio);
+            for (var color_val in color_count) {
+                solid_occurrences = Math.max(solid_occurrences, color_count[color_val]);
+            }
+
+            // If most of the frames are solid, return true
+            console.log(solid_occurrences / (pixel_data.length / 4));
+            return (solid_occurrences / (pixel_data.length / 4) >= .98);
         },
 
         _normalize_options: function(user_passed_options) {
@@ -314,7 +320,7 @@
                     enabled: false,
                     frames: 5,
                     secs: 0.25,
-                    max_ratio: 0.95
+                    max_ratio: 0.98
                 }
             };
 
