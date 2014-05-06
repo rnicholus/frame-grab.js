@@ -18,7 +18,7 @@
         "karma-jasmine": "~0.2.0",
         "karma-script-launcher": "~0.1.0"
     },
-    "license": "AGPL-3.0",
+    "license": "MIT",
     "name": "frame-grab",
     "repository": {
         "type" : "git",
