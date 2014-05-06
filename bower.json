@@ -14,7 +14,7 @@
     "canvas",
     "video"
   ],
-  "license": "AGPL-3.0",
+  "license": "MIT",
   "ignore": [
       ".idea/",
       "node_modules/"
