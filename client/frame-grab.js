@@ -146,6 +146,32 @@
         };
 
     FrameGrab.prototype = {
+        secs_to_time_string: function(secs, opt_precision) {
+            var pad_tc = function(segment) {
+                    return ("00" + segment).substr(-2, 2);
+                },
+                formatted_time_string, tc_mins, tc_secs, tc_secs_remainder,
+                tc_hours = Math.floor(secs / 60 / 60);
+
+            formatted_time_string = pad_tc(tc_hours) + ":";
+            secs -= tc_hours * 60 * 60;
+
+            tc_mins = Math.floor(secs / 60);
+            formatted_time_string += pad_tc(tc_mins) + ":";
+            secs -= tc_mins * 60;
+
+            tc_secs = Math.floor(secs);
+            formatted_time_string += pad_tc(tc_secs);
+            secs -= tc_secs;
+
+            if (secs > 0) {
+                tc_secs_remainder = secs.toFixed(opt_precision || 2);
+                formatted_time_string += String(tc_secs_remainder).replace("0.", ".");
+            }
+
+            return formatted_time_string;
+        },
+
         _calculate_scaled_dimensions: function(video, max_size) {
             if (max_size >= video.videoWidth && max_size >= video.videoHeight) {
                 return {
@@ -513,60 +539,6 @@
 
         return deferred.promise;
     };
-
-    // TODO eliminate redundancies
-    FrameGrab.secs_to_timecode = function(secs, framerate) {
-        var pad_tc = function(segment) {
-                return ("00" + segment).substr(-2, 2);
-            },
-            timecode, tc_mins, tc_secs, tc_frames,
-            tc_hours = Math.floor(secs / 60 / 60);
-
-        timecode = pad_tc(tc_hours) + ":";
-        secs -= tc_hours * 60 * 60;
-
-        tc_mins = Math.floor(secs / 60);
-        timecode += pad_tc(tc_mins) + ":";
-        secs -= tc_mins * 60;
-
-        tc_secs = Math.floor(secs);
-        timecode += pad_tc(tc_secs) + ":";
-        secs -= tc_secs;
-
-        tc_frames = Math.floor(secs * framerate);
-        timecode += pad_tc(tc_frames);
-
-        return timecode;
-    };
-
-    // TODO eliminate redundancies
-    FrameGrab.secs_to_formatted_time_string = function(secs, precision) {
-        var pad_tc = function(segment) {
-                return ("00" + segment).substr(-2, 2);
-            },
-            formatted_time_string, tc_mins, tc_secs, tc_secs_remainder,
-            tc_hours = Math.floor(secs / 60 / 60);
-
-        formatted_time_string = pad_tc(tc_hours) + ":";
-        secs -= tc_hours * 60 * 60;
-
-        tc_mins = Math.floor(secs / 60);
-        formatted_time_string += pad_tc(tc_mins) + ":";
-        secs -= tc_mins * 60;
-
-        tc_secs = Math.floor(secs);
-        formatted_time_string += pad_tc(tc_secs);
-        secs -= tc_secs;
-
-        if (secs > 0) {
-            tc_secs_remainder = secs.toFixed(precision);
-            formatted_time_string += String(tc_secs_remainder).replace("0.", ".");
-        }
-
-        return formatted_time_string;
-    };
-
-    FrameGrab.timecode_to_secs = FrameGrab.prototype.timecode_to_secs;
 
     this.FrameGrab = FrameGrab;
 }());
