@@ -20,6 +20,20 @@ describe("_timecode_to_secs", function() {
     });
 });
 
+describe("secs_to_time_string", function() {
+    it("generates a valid time string for 0 seconds", function() {
+        expect(FrameGrab.prototype.secs_to_time_string(0, 2)).toEqual("00:00:00");
+    });
+
+    it("generates a valid time string for 1.234 seconds, precision 2", function() {
+        expect(FrameGrab.prototype.secs_to_time_string(1.234, 2)).toEqual("00:00:01.23");
+    });
+
+    it("generates a valid time string for 3932.01 seconds", function() {
+        expect(FrameGrab.prototype.secs_to_time_string(3932.01, 2)).toEqual("01:05:32.01");
+    });
+});
+
 describe("_normalize_time", function() {
     it("throws an Error on invalid parameters", function() {
         expect(function() {
@@ -52,7 +66,6 @@ describe("_normalize_time", function() {
         expect(FrameGrab.prototype._normalize_time("1:1:1:15", 30)).toEqual(3661.5);
     });
 });
-
 
 describe("constructor", function() {
     it("throws an Error if constructed without a <video>", function() {
@@ -327,9 +340,9 @@ describe("live video tests", function() {
             var canvas = document.createElement("canvas"),
                 deferred = new RSVP.defer(),
                 fg = new FrameGrab({
-                video: this.video_el,
-                frame_rate: 30
-            });
+                    video: this.video_el,
+                    frame_rate: 30
+                });
 
             deferred.resolve();
             spyOn(fg, "grab").and.returnValue(deferred.promise);
@@ -342,6 +355,7 @@ describe("live video tests", function() {
                     done();
                 }.bind(this));
             }.bind(this);
+
             this.video_el.addEventListener("canplay", done_callback);
         });
     });
