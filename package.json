@@ -4,6 +4,9 @@
     },
     "bugs": "https://github.com/rnicholus/frame-grab.js/issues",
     "description": "Do cool and useful things with videos using canvas",
+    "dependencies": {
+        "rsvp": "3.0.x"
+    },
     "devDependencies": {
         "express": "3.x",
         "grunt": "0.4.x",
