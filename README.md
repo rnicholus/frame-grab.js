@@ -20,13 +20,11 @@ on upcoming features.
 
 ### API
 To construct an instance, you must pass an `Object` with some configuration options.
-At a minimum, you must incude a reference to your source `<video>` and the video's
-frame-rate, like this:
+At a minimum, you must include a reference to your source `<video>`, like this:
 
 ```javascript
 var fg = new FrameGrab({
-    video: document.getElementById("myVideo"),
-    frame_rate: 30 //video is 30 FPS
+    video: document.getElementById("myVideo")
 });
 ```
 
@@ -34,13 +32,14 @@ There are other optional configuration parameters as well.  Here is a list of al
 possible options that you can pass to the constructor as properties of an object
 (default values are in square brackets):
 - `video`: (HTMLVideoElement) - [REQUIRED] The source video.
-- `frame_rate`: (Float) - [REQUIRED] The frame rate of the video.
+- `frame_rate`: (Float) - (`null`) The frame rate of the video.  Must be specified only if you intend to address the API using SMPTE timecode parameters or use methods dependent on frame calculation.
 - `skip_solids.enabled`: (Boolean) - [false] True if you want frame-grab to skip past frames that are mostly solid.
 - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found.
+- `skip_solids.secs`: (Float) - [0.25] Number of seconds to skip ahead when a solid frame is found.  Used if no frame_rate is specified during construction.
 - `skip_solids.max_ratio`: (Float) - [0.95] If the frame contains more solid pixels, it will be skipped.
 
 
-frame-grab also provides two methods:
+frame-grab also provides several API methods:
 
 #### FrameGrab.grab
 This method asks frame-grab to render a specific frame of your source video onto
@@ -78,14 +77,6 @@ for your video, simply by seeking to that frame in the player and calling this m
 (`<canvas>` or `<img>`), and an optional maximum scaled size for the rendered frame.
 
 
-[issues]: https://github.com/rnicholus/frame-grab.js/issues
-[promise]: http://promises-aplus.github.io/promises-spec/
-[rsvp]: https://github.com/tildeio/rsvp.js/tree/master
-[testindex]: https://github.com/rnicholus/frame-grab.js/blob/master/test/index.html
-[timecode]: https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=5%26tasks=true
-
-
-
 #### FrameGrab.make_story
 Frame Grab will create a storyboard for you!  Just point it at a video and let it know
 how many images you require.  The result will be proportionally spaced frame grabs of
@@ -95,3 +86,10 @@ your video, representing a visual outline of your video.
 - `type`: (String) - [REQUIRED] Type of image containers to create ("canvas" or "img").
 - `images`: (Integer) - [REQUIRED] Total number of images to generate.
 - `size`: (Integer) - The size of the rendered images.  If omitted, the size of the video will be used.
+
+
+[issues]: https://github.com/rnicholus/frame-grab.js/issues
+[promise]: http://promises-aplus.github.io/promises-spec/
+[rsvp]: https://github.com/tildeio/rsvp.js/tree/master
+[testindex]: https://github.com/rnicholus/frame-grab.js/blob/master/test/index.html
+[timecode]: https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=5%26tasks=true

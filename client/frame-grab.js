@@ -2,17 +2,6 @@
 
     var Promise = RSVP.Promise,
 
-        // TODO document that frame_rate is now optional (unless timecode args are used)
-        /**
-         * Supported options object properties:
-         *
-         * - `video`: (HTMLVideoElement) - [REQUIRED] The source video
-         * - `frame_rate`: (Float) - [null/undefined] The frame rate of the video.  Must be specified only if you intend to address the API using SMPTE timecode parameters or use methods dependent on frame calculation.
-         * - `skip_solids.enabled`: (Boolean) - [false] True if you want to skip past frames that are mostly solid.
-         * - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found.  Used if a frame_rate is specified during constructions.
-         * - `skip_solids.secs`: (Float) - [0.25] Number of seconds to skip ahead when a solid frame is found.  Used if no frame_rate is specified during construction.
-         * - `skip_solids.max_ratio`: (Float) - [0.98] If the frame contains more solid pixels, it will be skipped.
-         */
         FrameGrab = function(user_passed_opts) {
             var options = this._normalize_options(user_passed_opts);
 
