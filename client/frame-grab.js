@@ -33,9 +33,9 @@
             this.grab = function(target_container, time, opt_max_size) {
                 if (!this._is_element(target_container, "img") &&
                     !this._is_element(target_container, "canvas") &&
-                    !target_container && target_container.toLowerCase() !== "blob") {
+                    !(target_container && target_container.toLowerCase() === "blob")) {
 
-                    throw new Error("Target container must be an <img>, <canvas>, or 'blob'!");
+                    throw new Error("Target container must be an <img>, <canvas>, or  `Blob`!");
                 }
 
                 var grab_deferred = new RSVP.defer(),
@@ -68,7 +68,7 @@
                                 grab_deferred.resolve({time: result.time, container: target_container});
                             }
 
-                            else if (this._is_element("img")) {
+                            else if (this._is_element(target_container, "img")) {
                                 target_container.onload = function() {
                                     grab_deferred.resolve({time: result.time, container: target_container});
                                 };
@@ -80,7 +80,10 @@
 
                             // target container is a Blob
                             else {
-                                grab_deferred.resolve({time: result.time, container: this._dataUriToBlob(temp_canvas.toDataURL())});
+                                grab_deferred.resolve({
+                                    time: result.time,
+                                    container: this._dataUriToBlob(temp_canvas.toDataURL())
+                                });
                             }
                         }.bind(this),
 
@@ -117,10 +120,7 @@
 
                     throw new Error(type + " is not a valid type!");
                 }
-                else if (!images ||
-                    typeof images !== "number" ||
-                    images < 0) {
-
+                else if (!images || typeof images !== "number" || images < 0) {
                     throw new Error(images + " is not a valid number of images!");
                 }
 
@@ -129,7 +129,9 @@
                         rendered_frames = [],
 
                         draw_next_frame = function(time_to_render) {
-                            var container = normalized_type === "blob" ? "blob" : document.createElement(normalized_type);
+                            var container = normalized_type === "blob" ?
+                                "blob" :
+                                document.createElement(normalized_type);
 
                             this.grab(container, time_to_render, size).then(
                                 function grabbed(rendered_container) {
@@ -277,8 +279,8 @@
         // That is, detect ALL solid colors and colors that are near-solid.
         // TODO This code became very messy during FedEx Day.  Soem time will need to be spent cleaning this up.
         _is_solid_color: function(video, max_solid_ratio) {
-                // re-draw the frame onto the canvas at a minimal size
-                // to speed up image data parsing
+            // re-draw the frame onto the canvas at a minimal size
+            // to speed up image data parsing
             var canvas = this._draw(video, document.createElement("canvas"), 10),
                 context = canvas.getContext("2d"),
                 image_data = context.getImageData(0, 0, canvas.width, canvas.height),
@@ -305,35 +307,41 @@
             }
 
             function get_like_solid_occurrences(occurrences_by_color, color_index) {
-                var range = 5,
-                    current_idx = color_index,
+                var current_idx = color_index,
                     occurrences = occurrences_by_color[color_index];
 
-                for (var i = 1; i <= 5 && current_idx < occurrences_by_color.length; i++) {
-                    current_idx++;
-                    if (occurrences_by_color[current_idx]) {
-                        occurrences += occurrences_by_color[current_idx];
+                (function() {
+                    for (var i = 1; i <= 5 && current_idx < occurrences_by_color.length; i++) {
+                        current_idx++;
+                        if (occurrences_by_color[current_idx]) {
+                            occurrences += occurrences_by_color[current_idx];
+                        }
                     }
-                }
+                }());
 
                 current_idx = color_index;
-                for (var i = 1; i > 0 && current_idx >= 0; i++) {
-                    current_idx--;
-                    if (occurrences_by_color[current_idx]) {
-                        occurrences += occurrences_by_color[current_idx];
+
+                (function() {
+                    for (var i = 1; i > 0 && current_idx >= 0; i++) {
+                        current_idx--;
+                        if (occurrences_by_color[current_idx]) {
+                            occurrences += occurrences_by_color[current_idx];
+                        }
                     }
-                }
+                }());
 
                 return occurrences;
             }
 
-            var occurrences = 0;
-            for (var color_val in color_count) {
-                if (color_val !== "length") {
-                    occurrences = get_like_solid_occurrences(color_count, parseInt(color_val));
-                    solid_occurrences = Math.max(solid_occurrences, occurrences);
+            (function() {
+                var occurrences = 0;
+                for (var color_val in color_count) {
+                    if (color_val !== "length") {
+                        occurrences = get_like_solid_occurrences(color_count, parseInt(color_val));
+                        solid_occurrences = Math.max(solid_occurrences, occurrences);
+                    }
                 }
-            }
+            }());
 
             // If most of the frames are solid, return true
             return (solid_occurrences / (pixel_data.length / 4) > max_solid_ratio);
