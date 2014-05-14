@@ -4,6 +4,8 @@ frame-grab.js
 ## Grab, manipulate, and render &lt;video> frames
 
 [![Build Status](https://travis-ci.org/rnicholus/frame-grab.js.svg?branch=master)](https://travis-ci.org/rnicholus/frame-grab.js)
+[![Dependency Status](https://david-dm.org/rnicholus/frame-grab.js.svg?theme=shields.io)](https://david-dm.org/rnicholus/frame-grab.js)
+[![devDependency Status](https://david-dm.org/rnicholus/frame-grab.js/dev-status.svg?theme=shields.io)](https://david-dm.org/rnicholus/frame-grab.js#info=devDependencies)
 [![Semver](http://img.shields.io/SemVer/2.0.0.png)](http://semver.org/spec/v2.0.0.html)
 
 <img src="http://benschwarz.github.io/bower-badges/badge@2x.png" width="130" height="30">
