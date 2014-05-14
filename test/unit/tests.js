@@ -67,10 +67,6 @@ describe("constructor", function() {
 
         /* jshint nonew:false */
         expect(function() {
-            new FrameGrab({video: video});
-        }).toThrow();
-
-        expect(function() {
             new FrameGrab({video: video, frame_rate: 0});
         }).toThrow();
 
@@ -420,13 +416,21 @@ describe("live video tests", function() {
                 });
 
                 fg.make_story("canvas", 5).then(
-                    function success(canvases) {
-                        expect(canvases.length).toBe(5);
-                        for (var i = 0; i < canvases.length; i++) {
-                            expect(canvases[i].tagName.toLowerCase()).toEqual("canvas");
-                            expect(canvases[i].width).toEqual(expected_video_width);
-                            expect(canvases[i].height).toEqual(expected_video_height);
-                        }
+                    function success(story_items) {
+                        var last_time = 0;
+
+                        expect(story_items.length).toBe(5);
+                        story_items.forEach(function(story_item) {
+                            var time = story_item.time,
+                                container = story_item.container;
+
+                            expect(time).toBeGreaterThan(last_time);
+                            last_time = time;
+
+                            expect(container.tagName.toLowerCase()).toEqual("canvas");
+                            expect(container.width).toEqual(expected_video_width);
+                            expect(container.height).toEqual(expected_video_height);
+                        });
                         done();
                     },
 
@@ -443,18 +447,25 @@ describe("live video tests", function() {
                 });
 
                 fg.make_story("img", 5).then(
-                    function success(imgs) {
-                        var last_data_uri;
+                    function success(story_items) {
+                        var last_time = 0,
+                            last_data_uri;
 
-                        expect(imgs.length).toBe(5);
-                        for (var i = 0; i < imgs.length; i++) {
-                            expect(imgs[i].tagName.toLowerCase()).toEqual("img");
-                            expect(imgs[i].src).not.toEqual(last_data_uri);
-                            expect(imgs[i].width).toEqual(expected_video_width);
-                            expect(imgs[i].height).toEqual(expected_video_height);
+                        expect(story_items.length).toBe(5);
+                        story_items.forEach(function(story_item) {
+                            var time = story_item.time,
+                                container = story_item.container;
 
-                            last_data_uri = imgs[i].src;
-                        }
+                            expect(time).toBeGreaterThan(last_time);
+                            last_time = time;
+
+                            expect(container.tagName.toLowerCase()).toEqual("img");
+                            expect(container.width).toEqual(expected_video_width);
+                            expect(container.height).toEqual(expected_video_height);
+
+                            expect(container.src).not.toEqual(last_data_uri);
+                            last_data_uri = container.src;
+                        });
                         done();
                     },
 
