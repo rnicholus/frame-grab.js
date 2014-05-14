@@ -23,7 +23,7 @@ module.exports = {
         ]
     },
     dev: {
-        browsers: ["Chrome"]
+        browsers: ["Firefox"]
     },
     travis: {
         browsers: ["Firefox"]
