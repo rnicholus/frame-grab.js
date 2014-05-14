@@ -474,6 +474,36 @@ describe("live video tests", function() {
                     }
                 );
             });
+
+            it("generates expected number of blobs (w/out frame rate)", function(done) {
+                var fg = new FrameGrab({
+                    video: this.video_el
+                });
+
+                fg.make_story("blob", 5).then(
+                    function success(story_items) {
+                        var last_time = 0;
+
+                        expect(story_items.length).toBe(5);
+                        story_items.forEach(function(story_item) {
+                            var time = story_item.time,
+                                container = story_item.container;
+
+                            expect(time).toBeGreaterThan(last_time);
+                            last_time = time;
+
+                            expect(container instanceof Blob).toBe(true);
+                            expect(container.type).toEqual("image/png");
+                            expect(container.size).toBeGreaterThan(0);
+                        });
+                        done();
+                    },
+
+                    function failure() {
+                        console.error("make_story failed!");
+                    }
+                );
+            });
         });
     });
 });
