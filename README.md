@@ -88,6 +88,15 @@ your video, representing a visual outline of your video.
 - `size`: (Integer) - The size of the rendered images.  If omitted, the size of the video will be used.
 
 
+#### FrameGrab.secs_to_time_string
+You can pass in a number of seconds (as a float/integer) and receive a formatted time string
+in this format: HH:mm:ss.mm.  This is useful if you need to easily display the time values
+returned by frame-grab in the `make_story` API method results. 
+
+`secs_to_time_string_ takes two parameters:
+- `secs`: (Float/Integer) - [REQUIRED] Number of seconds to convert.
+- `precision`: (Integer) - [2] The number of decimal places to round the milliseconds portion of the time string.
+
 [issues]: https://github.com/rnicholus/frame-grab.js/issues
 [promise]: http://promises-aplus.github.io/promises-spec/
 [rsvp]: https://github.com/tildeio/rsvp.js/tree/master
