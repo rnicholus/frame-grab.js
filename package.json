@@ -22,7 +22,7 @@
         "karma-jasmine": "~0.2.0",
         "karma-script-launcher": "~0.1.0"
     },
-    "license": "MIT",
+    "license": "GPLv3",
     "name": "frame-grab",
     "repository": {
         "type" : "git",
