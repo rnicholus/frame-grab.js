@@ -138,6 +138,36 @@ describe("_is_element", function() {
     });
 });
 
+describe("blob_to_video", function() {
+    it("converts a valid/supported video blob to a video el", function(done) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("get", "http://localhost:3000/black_screen_test.ogv");
+        xhr.responseType = "blob";
+        xhr.onload = function() {
+            var blob = xhr.response;
+            FrameGrab.blob_to_video(blob).then(function(videoEl) {
+                expect(videoEl.src).toBeTruthy();
+                expect(videoEl.videoHeight).toBeGreaterThan(0);
+                expect(videoEl.videoWidth).toBeGreaterThan(0);
+                done();
+            });
+        };
+        xhr.send();
+    });
+
+    it("properly fails a invalid/unsupported video blob", function(done) {
+        FrameGrab.blob_to_video(new Blob(["test"], {type: "text/plain"})).then(
+            function videoRendered(videoEl) {},
+
+            function videoFailedToRender(reason) {
+                expect(reason).toBeTruthy();
+                done();
+            }
+        );
+    });
+});
+
 describe("live video tests", function() {
     function setupVideo(name) {
         var timestamp = Date.now(),

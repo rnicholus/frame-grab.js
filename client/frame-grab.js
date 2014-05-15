@@ -552,26 +552,23 @@
         }
     };
 
-    // TODO cleanup & test
-    FrameGrab.make_video = function(blob, video) {
-        var URL = window.URL || window.webkitURL,
-            video_url = URL.createObjectURL(blob),
-            temp_video = document.createElement("video"),
-            deferred = new RSVP.defer();
-
-        temp_video.addEventListener("canplay", function() {
-            video.setAttribute("src", video_url);
-            deferred.resolve(video);
-        });
-
-        temp_video.onerror = function() {
-            deferred.reject();
-        };
-
-        temp_video.setAttribute("src", video_url);
-
-        return deferred.promise;
-    };
-
     this.FrameGrab = FrameGrab;
+
+    this.FrameGrab.blob_to_video = function(video_blob) {
+        return new Promise(function(resolve, reject) {
+            var URL = window.URL || window.webkitURL,
+                video_url = URL.createObjectURL(video_blob),
+                temp_video = document.createElement("video");
+
+            temp_video.addEventListener("canplay", function() {
+                resolve(temp_video);
+            });
+
+            temp_video.onerror = function() {
+                reject("Blob/File is not a valid video or uses a codec not supported by this browser.");
+            };
+
+            temp_video.setAttribute("src", video_url);
+        });
+    };
 }());

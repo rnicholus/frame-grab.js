@@ -55,6 +55,7 @@
         "RSVP",
         "spyOn",
         "Uint8Array",
-        "window"
+        "window",
+        "XMLHttpRequest"
     ]
 }
