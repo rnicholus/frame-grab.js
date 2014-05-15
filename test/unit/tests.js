@@ -20,6 +20,20 @@ describe("_timecode_to_secs", function() {
     });
 });
 
+describe("secs_to_time_string", function() {
+    it("generates a valid time string for 0 seconds", function() {
+        expect(FrameGrab.prototype.secs_to_time_string(0, 2)).toEqual("00:00:00");
+    });
+
+    it("generates a valid time string for 1.234 seconds, precision 2", function() {
+        expect(FrameGrab.prototype.secs_to_time_string(1.234, 2)).toEqual("00:00:01.23");
+    });
+
+    it("generates a valid time string for 3932.01 seconds", function() {
+        expect(FrameGrab.prototype.secs_to_time_string(3932.01, 2)).toEqual("01:05:32.01");
+    });
+});
+
 describe("_normalize_time", function() {
     it("throws an Error on invalid parameters", function() {
         expect(function() {
@@ -53,7 +67,6 @@ describe("_normalize_time", function() {
     });
 });
 
-
 describe("constructor", function() {
     it("throws an Error if constructed without a <video>", function() {
         /* jshint nonew:false */
@@ -67,16 +80,24 @@ describe("constructor", function() {
 
         /* jshint nonew:false */
         expect(function() {
-            new FrameGrab({video: video});
-        }).toThrow();
-
-        expect(function() {
             new FrameGrab({video: video, frame_rate: 0});
         }).toThrow();
 
         expect(function() {
             new FrameGrab({video: video, frame_rate: -1});
         }).toThrow();
+    });
+});
+
+describe("_data_uri_to_blob", function() {
+    it("converts a data URI to a blob", function() {
+        var canvas = document.createElement("canvas"),
+            data_uri = canvas.toDataURL("image/png"),
+            blob = FrameGrab.prototype._data_uri_to_blob(data_uri);
+
+        expect(blob).toBeTruthy();
+        expect(blob.size).toBeGreaterThan(0);
+        expect(blob.type).toBe("image/png");
     });
 });
 
@@ -114,6 +135,36 @@ describe("_is_element", function() {
         expect(FrameGrab.prototype._is_element(document.createElement("div"), "div")).toBe(true);
         expect(FrameGrab.prototype._is_element(document.createElement("canvas"), "canvas")).toBe(true);
         expect(!FrameGrab.prototype._is_element(document.createElement("div"), "span")).toBe(true);
+    });
+});
+
+describe("blob_to_video", function() {
+    it("converts a valid/supported video blob to a video el", function(done) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("get", "http://localhost:3000/black_screen_test.ogv");
+        xhr.responseType = "blob";
+        xhr.onload = function() {
+            var blob = xhr.response;
+            FrameGrab.blob_to_video(blob).then(function(videoEl) {
+                expect(videoEl.src).toBeTruthy();
+                expect(videoEl.videoHeight).toBeGreaterThan(0);
+                expect(videoEl.videoWidth).toBeGreaterThan(0);
+                done();
+            });
+        };
+        xhr.send();
+    });
+
+    it("properly fails a invalid/unsupported video blob", function(done) {
+        FrameGrab.blob_to_video(new Blob(["test"], {type: "text/plain"})).then(
+            function videoRendered(videoEl) {},
+
+            function videoFailedToRender(reason) {
+                expect(reason).toBeTruthy();
+                done();
+            }
+        );
     });
 });
 
@@ -331,9 +382,9 @@ describe("live video tests", function() {
             var canvas = document.createElement("canvas"),
                 deferred = new RSVP.defer(),
                 fg = new FrameGrab({
-                video: this.video_el,
-                frame_rate: 30
-            });
+                    video: this.video_el,
+                    frame_rate: 30
+                });
 
             deferred.resolve();
             spyOn(fg, "grab").and.returnValue(deferred.promise);
@@ -346,7 +397,169 @@ describe("live video tests", function() {
                     done();
                 }.bind(this));
             }.bind(this);
+
             this.video_el.addEventListener("canplay", done_callback);
+        });
+    });
+
+    describe("make_story", function() {
+        describe("parameter error handling", function() {
+            beforeEach(function() {
+                this.fg = new FrameGrab({
+                    video: document.createElement("video"),
+                    frame_rate: 1
+                });
+            });
+
+            it("rejects invalid type param", function() {
+                expect(function() {
+                    this.fg.make_story(null, 1);
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story("foobar", 1);
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story(1, 1);
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story("CANVAS", 1);
+                }.bind(this)).not.toThrow();
+
+                expect(function() {
+                    this.fg.make_story("canvas", 1);
+                }.bind(this)).not.toThrow();
+
+                expect(function() {
+                    this.fg.make_story("iMg", 1);
+                }.bind(this)).not.toThrow();
+
+                expect(function() {
+                    this.fg.make_story("img", 1);
+                }.bind(this)).not.toThrow();
+            });
+
+            it("rejects invalid images param", function() {
+                expect(function() {
+                    this.fg.make_story("canvas");
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story("canvas", -1);
+                }.bind(this)).toThrow();
+
+                expect(function() {
+                    this.fg.make_story("canvas", 0);
+                }.bind(this)).toThrow();
+            });
+        });
+
+        describe("live video tests", function() {
+            var expected_video_height = 360,
+                expected_video_width = 640;
+
+            beforeEach(function() {
+                setupVideo.call(this, "big_buck_bunny");
+            });
+            afterEach(cleanupVideo);
+
+            it("generates expected number of canvas elements", function(done) {
+                var fg = new FrameGrab({
+                    video: this.video_el,
+                    frame_rate: 30
+                });
+
+                fg.make_story("canvas", 5).then(
+                    function success(story_items) {
+                        var last_time = 0;
+
+                        expect(story_items.length).toBe(5);
+                        story_items.forEach(function(story_item) {
+                            var time = story_item.time,
+                                container = story_item.container;
+
+                            expect(time).toBeGreaterThan(last_time);
+                            last_time = time;
+
+                            expect(container.tagName.toLowerCase()).toEqual("canvas");
+                            expect(container.width).toEqual(expected_video_width);
+                            expect(container.height).toEqual(expected_video_height);
+                        });
+                        done();
+                    },
+
+                    function failure() {
+                        console.error("make_story failed!");
+                    }
+                );
+            });
+
+            it("generates expected number of img elements", function(done) {
+                var fg = new FrameGrab({
+                    video: this.video_el,
+                    frame_rate: 30
+                });
+
+                fg.make_story("img", 5).then(
+                    function success(story_items) {
+                        var last_time = 0,
+                            last_data_uri;
+
+                        expect(story_items.length).toBe(5);
+                        story_items.forEach(function(story_item) {
+                            var time = story_item.time,
+                                container = story_item.container;
+
+                            expect(time).toBeGreaterThan(last_time);
+                            last_time = time;
+
+                            expect(container.tagName.toLowerCase()).toEqual("img");
+                            expect(container.width).toEqual(expected_video_width);
+                            expect(container.height).toEqual(expected_video_height);
+
+                            expect(container.src).not.toEqual(last_data_uri);
+                            last_data_uri = container.src;
+                        });
+                        done();
+                    },
+
+                    function failure() {
+                        console.error("make_story failed!");
+                    }
+                );
+            });
+
+            it("generates expected number of blobs (w/out frame rate)", function(done) {
+                var fg = new FrameGrab({
+                    video: this.video_el
+                });
+
+                fg.make_story("blob", 5).then(
+                    function success(story_items) {
+                        var last_time = 0;
+
+                        expect(story_items.length).toBe(5);
+                        story_items.forEach(function(story_item) {
+                            var time = story_item.time,
+                                container = story_item.container;
+
+                            expect(time).toBeGreaterThan(last_time);
+                            last_time = time;
+
+                            expect(container instanceof Blob).toBe(true);
+                            expect(container.type).toEqual("image/png");
+                            expect(container.size).toBeGreaterThan(0);
+                        });
+                        done();
+                    },
+
+                    function failure() {
+                        console.error("make_story failed!");
+                    }
+                );
+            });
         });
     });
 });
