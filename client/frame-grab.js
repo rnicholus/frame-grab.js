@@ -86,9 +86,11 @@
 
                             // target container is a Blob
                             else {
-                                grab_deferred.resolve({
-                                    time: result.time,
-                                    container: this._dataUriToBlob(temp_canvas.toDataURL())
+                                this._canvas_to_blob(temp_canvas).then(function(blob) {
+                                    grab_deferred.resolve({
+                                        time: result.time,
+                                        container: blob
+                                    });
                                 });
                             }
                         }.bind(this),
@@ -206,6 +208,20 @@
             };
         },
 
+        _canvas_to_blob: function(canvas) {
+            return new Promise(function(resolve){
+                if (canvas.toBlob) {
+                    canvas.toBlob(function(blob) {
+                        resolve(blob);
+                    });
+                }
+                else {
+                    var dataUri = canvas.toDataURL();
+                    resolve(this._data_uri_to_blob(dataUri));
+                }
+            }.bind(this));
+        },
+
         // Most of this is a workaround for a bug in Chrome
         // that causes the loading of the cloned video to stall
         _clone_video: function(video) {
@@ -235,6 +251,52 @@
             // Not all impls of HTMLMediaElement include load() (i.e. phantomjs)
             clone.load && clone.load();
             return clone;
+        },
+
+        // Imported from Fine Uploader, GPLv3 Copyright 2013 Widen Enterprises
+        // https://github.com/Widen/fine-uploader/blob/4.4.0/client/js/scaling/scaler.js#L432
+        _createBlob: function(data, mime) {
+            var BlobBuilder = window.BlobBuilder ||
+                    window.WebKitBlobBuilder ||
+                    window.MozBlobBuilder ||
+                    window.MSBlobBuilder,
+                blobBuilder = BlobBuilder && new BlobBuilder();
+
+            if (blobBuilder) {
+                blobBuilder.append(data);
+                return blobBuilder.getBlob(mime);
+            }
+            else {
+                return new Blob([data], {type: mime});
+            }
+        },
+
+        // Imported from Fine Uploader, GPLv3 Copyright 2013 Widen Enterprises
+        // https://github.com/Widen/fine-uploader/blob/4.4.0/client/js/scaling/scaler.js#L404
+        _data_uri_to_blob: function(dataUri) {
+            var byteString, mimeString, arrayBuffer, intArray;
+
+            // convert base64 to raw binary data held in a string
+            if (dataUri.split(",")[0].indexOf("base64") >= 0) {
+                byteString = atob(dataUri.split(",")[1]);
+            }
+            else {
+                byteString = decodeURI(dataUri.split(",")[1]);
+            }
+
+            // extract the MIME
+            mimeString = dataUri.split(",")[0]
+                .split(":")[1]
+                .split(";")[0];
+
+            // write the bytes of the binary string to an ArrayBuffer
+            arrayBuffer = new ArrayBuffer(byteString.length);
+            intArray = new Uint8Array(arrayBuffer);
+            for (var i = 0; i < byteString.length; i++) {
+                intArray[i] = byteString.charCodeAt(i);
+            }
+
+            return this._createBlob(arrayBuffer, mimeString);
         },
 
         _draw: function(video, canvas, opt_max_size) {
@@ -487,56 +549,10 @@
             }
 
             return url;
-        },
-
-        // TODO cleanup this mess from FedEx Day
-        _dataUriToBlob: function(dataUri) {
-            "use strict";
-
-            var byteString, mimeString, arrayBuffer, intArray;
-
-            // convert base64 to raw binary data held in a string
-            if (dataUri.split(",")[0].indexOf("base64") >= 0) {
-                byteString = atob(dataUri.split(",")[1]);
-            }
-            else {
-                byteString = decodeURI(dataUri.split(",")[1]);
-            }
-
-            // extract the MIME
-            mimeString = dataUri.split(",")[0]
-                .split(":")[1]
-                .split(";")[0];
-
-            // write the bytes of the binary string to an ArrayBuffer
-            arrayBuffer = new ArrayBuffer(byteString.length);
-            intArray = new Uint8Array(arrayBuffer);
-            for (var i = 0; i < byteString.length; i++) {
-                intArray[i] = byteString.charCodeAt(i);
-            }
-
-            return this._createBlob(arrayBuffer, mimeString);
-        },
-
-        _createBlob: function(data, mime) {
-            "use strict";
-
-            var BlobBuilder = window.BlobBuilder ||
-                    window.WebKitBlobBuilder ||
-                    window.MozBlobBuilder ||
-                    window.MSBlobBuilder,
-                blobBuilder = BlobBuilder && new BlobBuilder();
-
-            if (blobBuilder) {
-                blobBuilder.append(data);
-                return blobBuilder.getBlob(mime);
-            }
-            else {
-                return new Blob([data], {type: mime});
-            }
         }
     };
 
+    // TODO cleanup & test
     FrameGrab.make_video = function(blob, video) {
         var URL = window.URL || window.webkitURL,
             video_url = URL.createObjectURL(blob),

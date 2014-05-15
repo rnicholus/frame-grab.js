@@ -89,6 +89,18 @@ describe("constructor", function() {
     });
 });
 
+describe("_data_uri_to_blob", function() {
+    it("converts a data URI to a blob", function() {
+        var canvas = document.createElement("canvas"),
+            data_uri = canvas.toDataURL("image/png"),
+            blob = FrameGrab.prototype._data_uri_to_blob(data_uri);
+
+        expect(blob).toBeTruthy();
+        expect(blob.size).toBeGreaterThan(0);
+        expect(blob.type).toBe("image/png");
+    });
+});
+
 describe("grab", function() {
     it("throws an Error on an invalid target container param", function() {
         var fg = new FrameGrab({video: document.createElement("video"), frame_rate: 1});
