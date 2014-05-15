@@ -4,6 +4,7 @@ frame-grab.js
 ## Grab, manipulate, and render &lt;video> frames
 
 [![Build Status](https://travis-ci.org/rnicholus/frame-grab.js.svg?branch=master)](https://travis-ci.org/rnicholus/frame-grab.js)
+[![Coverage Status](https://coveralls.io/repos/rnicholus/frame-grab.js/badge.png?branch=develop)](https://coveralls.io/r/rnicholus/frame-grab.js?branch=develop)
 [![Dependency Status](https://david-dm.org/rnicholus/frame-grab.js.svg?theme=shields.io)](https://david-dm.org/rnicholus/frame-grab.js)
 [![devDependency Status](https://david-dm.org/rnicholus/frame-grab.js/dev-status.svg?theme=shields.io)](https://david-dm.org/rnicholus/frame-grab.js#info=devDependencies)
 [![Semver](http://img.shields.io/SemVer/2.0.0.png)](http://semver.org/spec/v2.0.0.html)
