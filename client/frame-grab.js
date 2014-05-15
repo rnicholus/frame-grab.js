@@ -371,7 +371,7 @@
         },
 
         // That is, detect ALL solid colors and colors that are near-solid.
-        // TODO This code became very messy during FedEx Day.  Soem time will need to be spent cleaning this up.
+        // TODO Improve the readability and efficiency of this method.
         _is_solid_color: function(video, max_solid_ratio) {
             // re-draw the frame onto the canvas at a minimal size
             // to speed up image data parsing
