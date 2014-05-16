@@ -48,7 +48,8 @@ fg.grab(myImg, "1:15", 100).then(
 ```
 
 Note that the `grab` method returns a [promise][promise].  This is necessary as
-the operation is asynchronous.
+the operation is asynchronous.  If the operation is successful, an object will be returned 
+with a `time` and `container` property.
 
 
 ### `grab_now`
@@ -60,7 +61,8 @@ for your video, simply by seeking to that frame in the player and calling this m
 (`<canvas>` or `<img>`), and an optional maximum scaled size for the rendered frame.
 
 Note that the `grab_now` method returns a [promise][promise].  This is necessary as
-the operation is asynchronous.
+the operation is asynchronous.  If the operation is successful, an object will be returned 
+with a `time` and `container` property.
 
 ### `make_story`
 Frame Grab will create a storyboard for you!  Just point it at a video and let it know
