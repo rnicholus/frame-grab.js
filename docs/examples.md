@@ -31,8 +31,6 @@ This page contains examples that demonstrate various uses of frame-grab.  If you
 
 NOTE: You are limited to only rendering user-submitted video files with codecs that are supported by the current browser.  For a list of codecs that each browser currently supports, see [this media format browser compatibiltiy table][codes-by-browser]
 
-There are two ways to solicit a file from a user: drag & drop, and via a `<input type="file">` element.  This example will cover both.    
-
 First, the markup.  Include this in your HTML document.  The `accept` attribute is intended to only allow the user to select videos from the file chooser dialog.  Please keep in mind that [not all browsers support the `accept` attribute][accept-support].
 
 ### Step 1: Accepting a video file via an `<input type="file">` element
