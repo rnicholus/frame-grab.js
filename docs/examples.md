@@ -1,7 +1,7 @@
 Examples
 =============
 
-[![in progress notice](http://img.shields.io/badge/documentation-in%20progress-yellow.svg)]
+[![in progress notice](http://img.shields.io/badge/documentation-in%20progress-yellow.svg)]()
 
 This page contains examples that demonstrate various uses of frame-grab.  If you would like to see other examples included here, [please open up a request][newissue].
 
