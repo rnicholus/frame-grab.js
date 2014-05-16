@@ -17,6 +17,9 @@ for a simple example.  Please note that, while frame-grab is functional, it is n
 yet complete.  See the [issue tracker][issues] for information and progress
 on upcoming features.
 
+### Browser Support
+Frame-grab will not work in IE9 and older, or anything older than Safari 5.1.  Every other modern browser should, in theory, work just fine.  If you run into issues, please [file an issue][newissue].
+
 ### API
 See the [API documentation page][api].
 
@@ -26,5 +29,6 @@ See some code examples that describe various uses of frame-grab on the [examples
 [api]: docs/api.md
 [examples]: docs/examples.md
 [issues]: https://github.com/rnicholus/frame-grab.js/issues
+[newissue]: https://github.com/rnicholus/frame-grab.js/issues/new
 [testindex]: https://github.com/rnicholus/frame-grab.js/blob/master/test/index.html
 [rsvp]: https://github.com/tildeio/rsvp.js/tree/master
