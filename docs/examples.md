@@ -71,7 +71,7 @@ The following HTML should be placed after all other HTML from Step 1:
 <div id="frameGrabs"></div>
 ```
 
-You'll also need to handle the click event, and call the [`grab_now` method](api.md#grab-now) on your frame-grab instance:
+You'll also need to handle the click event, and call the [`grab_now` method](api.md#grab_now) on your frame-grab instance:
 ```javascript
   document.getElementById("grabCurrentFrame").onclick = function() {
     var canvas = document.createElement("canvas");
@@ -90,7 +90,7 @@ You'll also need to handle the click event, and call the [`grab_now` method](api
 
 ### Step 2-b: Ask frame-grab to generate a "story" of images from the video
 
-Maybe you just want to generate a variable number of equally spaced images that make up the video.  A summary, with pictures, if you will.  This is trivial with frame-grab's [make_story method](api.md#make-story).
+Maybe you just want to generate a variable number of equally spaced images that make up the video.  A summary, with pictures, if you will.  This is trivial with frame-grab's [make_story method](api.md#make_story).
 
 The following HTML should be placed after all other HTML from Step 1:
 ```html
@@ -98,7 +98,7 @@ The following HTML should be placed after all other HTML from Step 1:
 <div id="frameGrabs"></div>
 ```
 
-You'll also need to handle the click event, ask the user how many images they want in the summary, and finally call the [`make_story` method](api.md#grab-now) on your frame-grab instance:
+You'll also need to handle the click event, ask the user how many images they want in the summary, and finally call the [`make_story` method](api.md#make_story) on your frame-grab instance:
 ```javascript
   document.getElementById("generateSummary").onclick = function() {
     var numImages = parseInt(window.prompt("How many images?"));
