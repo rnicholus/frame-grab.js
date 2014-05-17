@@ -23,10 +23,10 @@
             var options = this._normalize_options(user_passed_opts);
 
             if (!this._is_element(options.video, "video")) {
-                throw new Error("You must pass a valid <video>!");
+                throw new FrameGrab.Error("You must pass a valid <video>!");
             }
             if (options.frame_rate != null && options.frame_rate <= 0) {
-                throw new Error("Invalid frame rate of " + options.frame_rate);
+                throw new FrameGrab.Error("Invalid frame rate of " + options.frame_rate);
             }
 
             var video_clone = this._clone_video(options.video),
@@ -39,9 +39,9 @@
             this.grab = function(target_container, time, opt_max_size) {
                 if (!this._is_element(target_container, "img") &&
                     !this._is_element(target_container, "canvas") &&
-                    !(target_container && target_container.toLowerCase() === "blob")) {
+                    !(target_container && target_container.toLowerCase && target_container.toLowerCase() === "blob")) {
 
-                    throw new Error("Target container must be an <img>, <canvas>, or  `Blob`!");
+                    throw new FrameGrab.Error("Target container must be an <img>, <canvas>, or  `Blob`!");
                 }
 
                 var grab_deferred = new RSVP.defer(),
@@ -126,10 +126,10 @@
                     normalized_type !== "img" &&
                     normalized_type !== "blob") {
 
-                    throw new Error(type + " is not a valid type!");
+                    throw new FrameGrab.Error(type + " is not a valid type!");
                 }
                 else if (!images || typeof images !== "number" || images < 0) {
-                    throw new Error(images + " is not a valid number of images!");
+                    throw new FrameGrab.Error(images + " is not a valid number of images!");
                 }
 
                 clone_ready.then(function(cloned_video) {
@@ -480,7 +480,7 @@
                 return this._timecode_to_secs(time, frame_rate);
             }
             else {
-                throw new Error("Invalid time or frame rate");
+                throw new FrameGrab.Error("Invalid time or frame rate");
             }
         },
 
@@ -503,7 +503,7 @@
 
         _timecode_to_secs: function(timecode, frame_rate) {
             if(!/^(\d{1,2}:)?(\d{1,2}:)?(\d{1,2}:)?\d{1,2}$/.test(timecode)) {
-                throw new Error(timecode + " is not a valid timecode!");
+                throw new FrameGrab.Error(timecode + " is not a valid timecode!");
             }
 
             var segments = timecode.split(":").reverse(),
@@ -571,4 +571,10 @@
             temp_video.setAttribute("src", video_url);
         });
     };
+
+    this.FrameGrab.Error = function(message) {
+        this.message = "[frame-grab]: " + message;
+        console.error(this.message);
+    };
+    this.FrameGrab.Error.prototype = new Error();
 }());
