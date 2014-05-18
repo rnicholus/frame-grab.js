@@ -30,5 +30,5 @@
         "type" : "git",
         "url" : "https://github.com/rnicholus/frame-grab.git"
     },
-    "version": "0.4.1"
+    "version": "0.4.2"
 }
