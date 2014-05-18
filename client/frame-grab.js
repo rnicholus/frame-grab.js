@@ -25,7 +25,7 @@
             if (!this._is_element(options.video, "video")) {
                 throw new FrameGrab.Error("You must pass a valid <video>!");
             }
-            if (options.frame_rate != null && options.frame_rate <= 0) {
+            if (options.frame_rate != null && options.frame_rate < 1) {
                 throw new FrameGrab.Error("Invalid frame rate of " + options.frame_rate);
             }
 
