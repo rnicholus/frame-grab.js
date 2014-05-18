@@ -118,6 +118,7 @@
 
             this.make_story = function(type, images, opt_size) {
                 var deferred = new RSVP.defer(),
+                    normalized_images = parseInt(images),
                     normalized_type = type && type.toLowerCase(),
                     size = typeof opt_size === "number" && opt_size > 0 && opt_size;
 
@@ -128,12 +129,12 @@
 
                     throw new FrameGrab.Error(type + " is not a valid type!");
                 }
-                else if (!images || typeof images !== "number" || images < 0) {
+                else if (isNaN(normalized_images) || normalized_images <= 0) {
                     throw new FrameGrab.Error(images + " is not a valid number of images!");
                 }
 
                 clone_ready.then(function(cloned_video) {
-                    var frame_period = cloned_video.duration / (images + 1),
+                    var frame_period = cloned_video.duration / (normalized_images + 1),
                         rendered_frames = [],
 
                         draw_next_frame = function(time_to_render) {
@@ -145,7 +146,7 @@
                                 function grabbed(rendered_container) {
                                     rendered_frames.push(rendered_container);
 
-                                    if (rendered_frames.length < images) {
+                                    if (rendered_frames.length < normalized_images) {
                                         draw_next_frame(time_to_render + frame_period);
                                     }
                                     else {

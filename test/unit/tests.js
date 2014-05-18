@@ -439,6 +439,10 @@ describe("live video tests", function() {
                 expect(function() {
                     this.fg.make_story("img", 1);
                 }.bind(this)).not.toThrow();
+
+                expect(function() {
+                    this.fg.make_story("img", "5");
+                }.bind(this)).not.toThrow();
             });
 
             it("rejects invalid images param", function() {
