@@ -37,6 +37,12 @@
                 });
 
             this.grab = function(target_container, time, opt_max_size) {
+                if (typeof target_container === "string" &&
+                    (target_container.toLowerCase() === "canvas" || target_container.toLowerCase() === "img")) {
+
+                    target_container = document.createElement(target_container);
+                }
+
                 if (!this._is_element(target_container, "img") &&
                     !this._is_element(target_container, "canvas") &&
                     !(target_container && target_container.toLowerCase && target_container.toLowerCase() === "blob")) {

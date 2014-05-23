@@ -261,7 +261,8 @@ describe("live video tests", function() {
             });
 
             spyOn(fg, "_is_solid_color");
-            fg.grab(document.createElement("canvas"), 1).then(function() {
+            fg.grab("canvas", 1).then(function(result) {
+                expect(result.container.tagName.toLowerCase()).toBe("canvas");
                 expect(fg._is_solid_color).not.toHaveBeenCalled();
                 done();
             });

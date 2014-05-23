@@ -73,19 +73,17 @@ The following HTML should be placed after all other HTML from Step 1:
 
 You'll also need to handle the click event, and call the [`grab_now` method](api.md#grab_now) on your frame-grab instance:
 ```javascript
-  document.getElementById("grabCurrentFrame").onclick = function() {
-    var canvas = document.createElement("canvas");
-    
-    frameGrabInstance.grab_now(canvas).then(
-      function grabbed(itemEntry) {
-        document.getElementById("frameGrabs").appendChild(itemEntry.container);
-      },
+document.getElementById("grabCurrentFrame").onclick = function() {    
+  frameGrabInstance.grab_now("canvas").then(
+   function grabbed(itemEntry) {
+      document.getElementById("frameGrabs").appendChild(itemEntry.container);
+    },
       
-      function failedToGrab(reason) {
-        // TODO Handle failure to turn the video frame into a `<canvas>`.
-      }
-    );
-  }
+    function failedToGrab(reason) {
+      // TODO Handle failure to turn the video frame into a `<canvas>`.
+    }
+  );
+};
 ```
 
 ### Step 2-b: Ask frame-grab to generate a "story" of images from the video
@@ -100,23 +98,23 @@ The following HTML should be placed after all other HTML from Step 1:
 
 You'll also need to handle the click event, ask the user how many images they want in the summary, and finally call the [`make_story` method](api.md#make_story) on your frame-grab instance:
 ```javascript
-  document.getElementById("generateSummary").onclick = function() {
-    var numImages = parseInt(window.prompt("How many images?"));
+document.getElementById("generateSummary").onclick = function() {
+  var numImages = parseInt(window.prompt("How many images?"));
     
-    if (numImages) {
-      frameGrabInstance.make_story("canvas", numImages).then(
-        function generated(storyEntries) {
-          storyEntries.forEach(function(storyEntry) {
-            document.getElementById("frameGrabs").appendChild(storyEntry.container);
-          });
-        },
+  if (numImages) {
+    frameGrabInstance.make_story("canvas", numImages).then(
+      function generated(storyEntries) {
+        storyEntries.forEach(function(storyEntry) {
+          document.getElementById("frameGrabs").appendChild(storyEntry.container);
+        });
+      },
         
-        function failureToGenerate(reason) {
-          // TODO Handle failure to generate a story from the video.
-        }
-      );
-    }
+      function failureToGenerate(reason) {
+        // TODO Handle failure to generate a story from the video.
+      }
+    );
   }
+};
 ```
 
 For more options and API methods, please see the [API documentation page](api.md).

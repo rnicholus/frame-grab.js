@@ -7,9 +7,62 @@
     <script src="/client/frame-grab.js"></script>
 </head>
 <body>
-    <video controls="" preload="auto">
-        <source src="/test/resources/big_buck_bunny.mp4" type="video/mp4">
-        <source src="/test/resources/big_buck_bunny.ogv" type="video/ogg">
-    </video>
+<input type="file" id="videoFileInput" accept="video/*">
+<div id="videoContainer"></div>
+<button id="grabCurrentFrame">Grab the current frame</button>
+<button id="generateSummary">Create a summary, in images</button>
+<div id="frameGrabs"></div>
+
 </body>
+<script>
+    document.getElementById("videoFileInput").onchange = function() {
+      var file = this.files[0];
+
+      FrameGrab.blob_to_video(file).then(
+        function videoRendered(videoEl) {
+          var frameGrabInstance = new FrameGrab({video: videoEl});
+
+          videoEl.setAttribute("controls", "");
+          document.getElementById("videoContainer").appendChild(videoEl);
+
+
+            document.getElementById("generateSummary").onclick = function() {
+              var numImages = parseInt(window.prompt("How many images?"));
+
+              if (numImages) {
+                frameGrabInstance.make_story("canvas", numImages).then(
+                  function generated(storyEntries) {
+                    storyEntries.forEach(function(storyEntry) {
+                      document.getElementById("frameGrabs").appendChild(storyEntry.container);
+                    });
+                  },
+
+                  function failureToGenerate(reason) {
+                    // TODO Handle failure to generate a story from the video.
+                  }
+                );
+              }
+            };
+
+            document.getElementById("grabCurrentFrame").onclick = function() {
+              frameGrabInstance.grab_now("canvas").then(
+                function grabbed(itemEntry) {
+                  document.getElementById("frameGrabs").appendChild(itemEntry.container);
+                },
+
+                function failedToGrab(reason) {
+                  // TODO Handle failure to turn the video frame into a `<canvas>`.
+                }
+              );
+            };
+
+
+        },
+
+        function videoFailedToRender(reason) {
+          // TODO handle failure to convert the file to a video element
+        }
+      );
+    };
+</script>
 </html>

@@ -47,6 +47,10 @@ fg.grab(myImg, "1:15", 100).then(
 );
 ```
 
+`grab` takes three parameters, in order: The target container for the rendered frame
+(`<canvas>`/`<img>` for an existing element or "img"/"canvas" to require frame-grab to generate the element for you), 
+seconds or an SMPTE time code string, and an optional maximum scaled size for the rendered frame.
+
 Note that the `grab` method returns a [promise][promise].  This is necessary as
 the operation is asynchronous.  If the operation is successful, an object will be returned 
 with a `time` and `container` property.
@@ -58,7 +62,8 @@ be the `currentTime` of your source video.  This allows you to render a frame
 for your video, simply by seeking to that frame in the player and calling this method.
 
 `grab_now` takes two parameters, in order: The target container for the rendered frame
-(`<canvas>` or `<img>`), and an optional maximum scaled size for the rendered frame.
+(`<canvas>`/`<img>` for an existing element or "img"/"canvas" to require frame-grab to generate the element for you),
+and an optional maximum scaled size for the rendered frame.
 
 Note that the `grab_now` method returns a [promise][promise].  This is necessary as
 the operation is asynchronous.  If the operation is successful, an object will be returned 
