@@ -43,6 +43,10 @@ module.exports = {
     dev: {
         browsers: ["Firefox"]
     },
+    server: {
+        hostname: "outrun-altoun.codio.io",
+        singleRun: false    
+    },
     travis: {
         browsers: ["Firefox"]
     }
