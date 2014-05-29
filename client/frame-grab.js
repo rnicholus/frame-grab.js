@@ -32,6 +32,15 @@
             var video_clone = this._clone_video(options.video),
                 clone_ready = new Promise(function(resolve) {
                     video_clone.addEventListener("canplaythrough", function() {
+                        var canvas = document.createElement("canvas"),
+                            context = canvas.getContext("2d");
+
+                        // before declaring the cloned video "ready for parsing",
+                        // we must "warm it up first" to work around an issue in
+                        // Safari where the first call to drawImage for the
+                        // video results in an empty image.
+                        context.drawImage(video_clone, 0, 0);
+
                         resolve(video_clone);
                     });
                 });
