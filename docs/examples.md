@@ -36,7 +36,7 @@ First, the markup.  Include this in your HTML document.  The `accept` attribute 
 ### Step 1: Accepting a video file via an `<input type="file">` element
 
 ```html
-<input type="file" id="videoFileInput" accept="video/*">
+<input type="file" id="videoFileInput">
 <div id="videoContainer"></div>
 ```
 
