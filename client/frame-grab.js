@@ -387,7 +387,6 @@
         },
 
         // That is, detect ALL solid colors and colors that are near-solid.
-        // TODO Improve the readability and efficiency of this method.
         _is_solid_color: function(video, max_solid_ratio) {
             // re-draw the frame onto the canvas at a minimal size
             // to speed up image data parsing
@@ -417,28 +416,20 @@
             }
 
             function get_like_solid_occurrences(occurrences_by_color, color_index) {
-                var current_idx = color_index,
-                    occurrences = occurrences_by_color[color_index];
+                var variance_factor = 10,
 
-                (function() {
-                    for (var i = 1; i <= 5 && current_idx < occurrences_by_color.length; i++) {
-                        current_idx++;
-                        if (occurrences_by_color[current_idx]) {
-                            occurrences += occurrences_by_color[current_idx];
-                        }
+                    start_idx = color_index - variance_factor < 0 ? 0
+                        : color_index - variance_factor,
+
+                    final_idx = color_index + variance_factor,
+
+                    occurrences = 0;
+
+                for (var i = start_idx; i <= final_idx; i++) {
+                    if (occurrences_by_color[i]) {
+                        occurrences += occurrences_by_color[i];
                     }
-                }());
-
-                current_idx = color_index;
-
-                (function() {
-                    for (var i = 1; i > 0 && current_idx >= 0; i++) {
-                        current_idx--;
-                        if (occurrences_by_color[current_idx]) {
-                            occurrences += occurrences_by_color[current_idx];
-                        }
-                    }
-                }());
+                }
 
                 return occurrences;
             }
