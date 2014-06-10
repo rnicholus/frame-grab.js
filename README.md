@@ -5,8 +5,8 @@ frame-grab.js
 
 [![Build Status](https://travis-ci.org/rnicholus/frame-grab.js.svg?branch=master)](https://travis-ci.org/rnicholus/frame-grab.js)
 [![Coverage Status](https://coveralls.io/repos/rnicholus/frame-grab.js/badge.png?branch=master)](https://coveralls.io/r/rnicholus/frame-grab.js?branch=master)
-[![Dependency Status](https://david-dm.org/rnicholus/frame-grab.js.svg?theme=shields.io)](https://david-dm.org/rnicholus/frame-grab.js)
-[![devDependency Status](https://david-dm.org/rnicholus/frame-grab.js/dev-status.svg?theme=shields.io)](https://david-dm.org/rnicholus/frame-grab.js#info=devDependencies)
+[![Dependency Status](https://david-dm.org/garstasio/frame-grab.js.svg?theme=shields.io)](https://david-dm.org/rnicholus/frame-grab.js)
+[![devDependency Status](https://david-dm.org/garstasio/frame-grab.js/dev-status.svg?theme=shields.io)](https://david-dm.org/rnicholus/frame-grab.js#info=devDependencies)
 [![Semver](http://img.shields.io/SemVer/2.0.0.png)](http://semver.org/spec/v2.0.0.html)
 [![Bower Badge](http://img.shields.io/badge/get%20it-on%20bower-green.svg)](http://bower.io/)
 
