@@ -15,7 +15,7 @@ possible options that you can pass to the constructor as properties of an object
 (default values are in square brackets):
 - `video`: (HTMLVideoElement) - [REQUIRED] The source video.
 - `frame_rate`: (Float) - (`null`) The frame rate of the video.  Must be specified only if you intend to address the API using [SMPTE timecode][timecode] parameters or use methods dependent on frame calculation.
-- `skip_solids.enabled`: (Boolean) - [false] True if you want frame-grab to skip past frames that are mostly solid.
+- `skip_solids.enabled`: (Boolean) - [false] True if you want frame-grab to skip past frames that are mostly solid.  NOTE: This is still considered "experimental".  Improvements probably need to be made.
 - `skip_solids.frames`: (Integer) - [5] Number of frames to skip ahead when a solid frame is found.
 - `skip_solids.secs`: (Float) - [0.25] Number of seconds to skip ahead when a solid frame is found.  Used if no frame_rate is specified during construction.
 - `skip_solids.max_ratio`: (Float) - [0.95] If the frame contains more solid pixels, it will be skipped.
