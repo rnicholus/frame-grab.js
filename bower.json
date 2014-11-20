@@ -1,6 +1,6 @@
 {
   "name": "frame-grab.js",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "homepage": "https://github.com/rnicholus/frame-grab.js",
   "authors": [
     "Ray Nicholus"
@@ -20,7 +20,7 @@
       "node_modules/"
   ],
   "dependencies": {
-    "rsvp.js": "3.0.x"
+    "rsvp": "3.0.x"
   },
   "devDependencies": {
     "grunt": "0.4.x",
