@@ -46,7 +46,7 @@
                 });
 
             // ex) pixel_data : {width:300, height:300}
-            this.grab = function(target_container, time, pixel_data, opt_max_size) {
+            this.grab = function(target_container, time, opt_max_size, pixel_data) {
                 if (typeof target_container === "string" &&
                     (target_container.toLowerCase() === "canvas" || target_container.toLowerCase() === "img")) {
 
@@ -126,11 +126,11 @@
                 return grab_deferred.promise;
             };
 
-            this.grab_now = function(target_container, opt_max_size) {
+            this.grab_now = function(target_container, opt_max_size, pixel_data) {
                 var deferred = new RSVP.defer();
 
                 clone_ready.then(function() {
-                    this.grab(target_container, options.video.currentTime, opt_max_size).then(
+                    this.grab(target_container, options.video.currentTime, opt_max_size, pixel_data).then(
                         deferred.resolve,
                         deferred.reject
                     );
