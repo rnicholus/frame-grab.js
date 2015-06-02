@@ -46,7 +46,7 @@
                 });
 
             // ex) pixel_data : {width:300, height:300}
-            this.grab = function(target_container, time, opt_max_size, pixel_data) {
+            this.grab = function(target_container, time, pixel_data, opt_max_size) {
                 if (typeof target_container === "string" &&
                     (target_container.toLowerCase() === "canvas" || target_container.toLowerCase() === "img")) {
 
