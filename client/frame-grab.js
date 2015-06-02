@@ -45,7 +45,8 @@
                     });
                 });
 
-            this.grab = function(target_container, time, opt_max_size) {
+            // ex) pixel_data : {width:300, height:300}
+            this.grab = function(target_container, time, opt_max_size, pixel_data) {
                 if (typeof target_container === "string" &&
                     (target_container.toLowerCase() === "canvas" || target_container.toLowerCase() === "img")) {
 
@@ -84,7 +85,14 @@
                                 target_container.width = temp_canvas.width;
                                 target_container.height = temp_canvas.height;
 
-                                target_context.drawImage(temp_canvas, 0, 0);
+                                if(pixel_data !== null && pixel_data!== undefined && pixel_data !== '')
+                                {
+                                    target_context.drawImage(temp_canvas, 0, 0, pixel_data.width, pixel_data.height);
+                                }
+                                else
+                                {
+                                    target_context.drawImage(temp_canvas, 0, 0);
+                                }
 
                                 grab_deferred.resolve({time: result.time, container: target_container});
                             }
